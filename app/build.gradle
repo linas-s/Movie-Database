@@ -80,6 +80,9 @@ dependencies {
 
     // Fragment
     implementation 'androidx.fragment:fragment-ktx:1.4.0'
+
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
 }
 
 kapt {
