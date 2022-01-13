@@ -57,12 +57,22 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         )
 
+        val popularTvShowAdapter = ListItemAdapter(
+            onItemClick = { tvShow ->
+
+            },
+            onWatchlistClick = { tvShow ->
+                viewModel.onWatchlistClick(tvShow)
+            }
+        )
+
         binding.apply {
             recyclerViewTopMovies.apply {
                 adapter = topMovieAdapter
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
                 setHasFixedSize(true)
+                itemAnimator?.changeDuration = 0
             }
 
             recyclerViewPopularMovies.apply {
@@ -70,6 +80,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
                 setHasFixedSize(true)
+                itemAnimator?.changeDuration = 0
             }
 
             recyclerViewTopTvShows.apply {
@@ -77,6 +88,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
                 setHasFixedSize(true)
+                itemAnimator?.changeDuration = 0
+            }
+
+            recyclerViewPopularTvShows.apply {
+                adapter = popularTvShowAdapter
+                layoutManager =
+                    LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+                setHasFixedSize(true)
+                itemAnimator?.changeDuration = 0
             }
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -85,9 +105,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val result = it ?: return@collect
 
                         swipeRefreshLayout.isRefreshing = result is Resource.Loading
-                        //recyclerViewTopMovies.isVisible = !result.data.isNullOrEmpty()
-                        //recyclerViewPopularMovies.isVisible = !result.data.isNullOrEmpty()
-                        //recyclerViewTopTvShows.isVisible = !result.data.isNullOrEmpty()
+                        recyclerViewTopMovies.isVisible = !result.data.isNullOrEmpty()
+                        recyclerViewPopularMovies.isVisible = !result.data.isNullOrEmpty()
+                        recyclerViewTopTvShows.isVisible = !result.data.isNullOrEmpty()
+                        recyclerViewPopularTvShows.isVisible = !result.data.isNullOrEmpty()
                         textViewError.isVisible =
                             result.error != null && result.data.isNullOrEmpty()
                         buttonRetry.isVisible =
@@ -99,9 +120,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         )
 
                         topMovieAdapter.submitList(result.data) {
-                            if (viewModel.pendingScrollToTopAfterRefresh) {
+                            if (viewModel.top20MoviesPendingScrollToTopAfterRefresh) {
                                 recyclerViewTopMovies.scrollToPosition(0)
-                                viewModel.pendingScrollToTopAfterRefresh = false
+                                viewModel.top20MoviesPendingScrollToTopAfterRefresh = false
                             }
                         }
                     }
@@ -110,25 +131,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 launch {
                     viewModel.popular20Movies.collect {
                         val result = it ?: return@collect
-
-                        swipeRefreshLayout.isRefreshing = result is Resource.Loading
-                        //recyclerViewPopularMovies.isVisible = !result.data.isNullOrEmpty()
-                        //recyclerViewTopMovies.isVisible = !result.data.isNullOrEmpty()
-                        //recyclerViewTopTvShows.isVisible = !result.data.isNullOrEmpty()
-                        textViewError.isVisible =
-                            result.error != null && result.data.isNullOrEmpty()
-                        buttonRetry.isVisible =
-                            result.error != null && result.data.isNullOrEmpty()
-                        textViewError.text = getString(
-                            R.string.could_not_refresh,
-                            result.error?.localizedMessage
-                                ?: getString(R.string.unknown_error_occurred)
-                        )
-
                         popularMovieAdapter.submitList(result.data) {
-                            if (viewModel.pendingScrollToTopAfterRefresh) {
+                            if (viewModel.popular20MoviesPendingScrollToTopAfterRefresh) {
                                 recyclerViewPopularMovies.scrollToPosition(0)
-                                viewModel.pendingScrollToTopAfterRefresh = false
+                                viewModel.popular20MoviesPendingScrollToTopAfterRefresh = false
                             }
                         }
                     }
@@ -137,25 +143,22 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 launch {
                     viewModel.top20TvShows.collect {
                         val result = it ?: return@collect
-
-                        swipeRefreshLayout.isRefreshing = result is Resource.Loading
-                        //recyclerViewPopularMovies.isVisible = !result.data.isNullOrEmpty()
-                        //recyclerViewTopMovies.isVisible = !result.data.isNullOrEmpty()
-                        //recyclerViewTopTvShows.isVisible = !result.data.isNullOrEmpty()
-                        textViewError.isVisible =
-                            result.error != null && result.data.isNullOrEmpty()
-                        buttonRetry.isVisible =
-                            result.error != null && result.data.isNullOrEmpty()
-                        textViewError.text = getString(
-                            R.string.could_not_refresh,
-                            result.error?.localizedMessage
-                                ?: getString(R.string.unknown_error_occurred)
-                        )
-
                         topTvShowAdapter.submitList(result.data) {
-                            if (viewModel.pendingScrollToTopAfterRefresh) {
+                            if (viewModel.top20TvShowsPendingScrollToTopAfterRefresh) {
                                 recyclerViewTopTvShows.scrollToPosition(0)
-                                viewModel.pendingScrollToTopAfterRefresh = false
+                                viewModel.top20TvShowsPendingScrollToTopAfterRefresh = false
+                            }
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.popular20TvShows.collect {
+                        val result = it ?: return@collect
+                        popularTvShowAdapter.submitList(result.data) {
+                            if (viewModel.popular20TvShowsPendingScrollToTopAfterRefresh) {
+                                recyclerViewPopularTvShows.scrollToPosition(0)
+                                viewModel.popular20TvShowsPendingScrollToTopAfterRefresh = false
                             }
                         }
                     }

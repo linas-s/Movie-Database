@@ -28,4 +28,10 @@ interface MovieApi {
         @Query("api_key") apiKey: String = API_KEY,
         @Query("page") page: Int
     ): TvShowsListResponse
+
+    @GET("tv/popular")
+    suspend fun getPopularTvShows(
+        @Query("api_key") apiKey: String = API_KEY,
+        @Query("page") page: Int
+    ): TvShowsListResponse
 }

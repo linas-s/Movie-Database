@@ -5,6 +5,7 @@ import com.example.moviedb.api.MovieApi
 import com.example.moviedb.util.Resource
 import com.example.moviedb.util.networkBoundResource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -30,8 +31,13 @@ class MovieRepository @Inject constructor(
                 response.results
             },
             saveFetchResult = { serverMovies ->
+                val watchList = movieDao.getAllWatchlistMovies().first()
+
                 val movies =
                     serverMovies.map { serverMovie ->
+                        val isWatchlist = watchList.any { watchListMovie ->
+                            watchListMovie.id == serverMovie.id
+                        }
                         Movie(
                             id = serverMovie.id,
                             title = serverMovie.title,
@@ -44,7 +50,7 @@ class MovieRepository @Inject constructor(
                             posterPath = serverMovie.poster_path,
                             homepage = serverMovie.homepage,
                             runtime = serverMovie.runtime,
-                            isWatchlist = false
+                            isWatchlist = isWatchlist
                         )
                     }
                 movieDb.withTransaction {
@@ -52,7 +58,7 @@ class MovieRepository @Inject constructor(
                 }
             },
             shouldFetch = { cachedMovies ->
-                if (forceRefresh){
+                if (forceRefresh) {
                     true
                 } else {
                     val sortedMovies = cachedMovies.sortedBy { movie ->
@@ -66,8 +72,8 @@ class MovieRepository @Inject constructor(
                 }
             },
             onFetchSuccess = onFetchSuccess,
-            onFetchFailed = { t->
-                if (t !is HttpException && t !is IOException){
+            onFetchFailed = { t ->
+                if (t !is HttpException && t !is IOException) {
                     throw t
                 }
                 onFetchFailed(t)
@@ -88,8 +94,13 @@ class MovieRepository @Inject constructor(
                 response.results
             },
             saveFetchResult = { serverMovies ->
+                val watchList = movieDao.getAllWatchlistMovies().first()
+
                 val movies =
                     serverMovies.map { serverMovie ->
+                        val isWatchlist = watchList.any { watchListMovie ->
+                            watchListMovie.id == serverMovie.id
+                        }
                         Movie(
                             id = serverMovie.id,
                             title = serverMovie.title,
@@ -102,7 +113,7 @@ class MovieRepository @Inject constructor(
                             posterPath = serverMovie.poster_path,
                             homepage = serverMovie.homepage,
                             runtime = serverMovie.runtime,
-                            isWatchlist = false
+                            isWatchlist = isWatchlist
                         )
                     }
                 movieDb.withTransaction {
@@ -110,7 +121,7 @@ class MovieRepository @Inject constructor(
                 }
             },
             shouldFetch = { cachedMovies ->
-                if (forceRefresh){
+                if (forceRefresh) {
                     true
                 } else {
                     val sortedMovies = cachedMovies.sortedBy { movie ->
@@ -124,8 +135,8 @@ class MovieRepository @Inject constructor(
                 }
             },
             onFetchSuccess = onFetchSuccess,
-            onFetchFailed = { t->
-                if (t !is HttpException && t !is IOException){
+            onFetchFailed = { t ->
+                if (t !is HttpException && t !is IOException) {
                     throw t
                 }
                 onFetchFailed(t)
@@ -146,8 +157,13 @@ class MovieRepository @Inject constructor(
                 response.results
             },
             saveFetchResult = { serverTvShows ->
+                val watchList = movieDao.getAllWatchlistTvShows().first()
+
                 val tvShows =
                     serverTvShows.map { serverTvShow ->
+                        val isWatchlist = watchList.any { watchListTvShow ->
+                            watchListTvShow.id == serverTvShow.id
+                        }
                         TvShow(
                             id = serverTvShow.id,
                             title = serverTvShow.name,
@@ -161,7 +177,7 @@ class MovieRepository @Inject constructor(
                             backdropPath = serverTvShow.backdrop_path,
                             posterPath = serverTvShow.poster_path,
                             homepage = serverTvShow.homepage,
-                            isWatchlist = false
+                            isWatchlist = isWatchlist
                         )
                     }
                 movieDb.withTransaction {
@@ -169,7 +185,7 @@ class MovieRepository @Inject constructor(
                 }
             },
             shouldFetch = { cachedTvShows ->
-                if (forceRefresh){
+                if (forceRefresh) {
                     true
                 } else {
                     val sortedTvShows = cachedTvShows.sortedBy { tvShow ->
@@ -183,19 +199,86 @@ class MovieRepository @Inject constructor(
                 }
             },
             onFetchSuccess = onFetchSuccess,
-            onFetchFailed = { t->
-                if (t !is HttpException && t !is IOException){
+            onFetchFailed = { t ->
+                if (t !is HttpException && t !is IOException) {
                     throw t
                 }
                 onFetchFailed(t)
             }
         )
 
-    suspend fun updateMovie(movie: Movie){
+    fun getPopular20TvShows(
+        forceRefresh: Boolean,
+        onFetchSuccess: () -> Unit,
+        onFetchFailed: (Throwable) -> Unit
+    ): Flow<Resource<List<ListItem>>> =
+        networkBoundResource(
+            query = {
+                movieDao.getPopular20TvShows()
+            },
+            fetch = {
+                val response = movieApi.getPopularTvShows(page = 1)
+                response.results
+            },
+            saveFetchResult = { serverTvShows ->
+                val watchList = movieDao.getAllWatchlistTvShows().first()
+
+                val tvShows =
+                    serverTvShows.map { serverTvShow ->
+                        val isWatchlist = watchList.any { watchListTvShow ->
+                            watchListTvShow.id == serverTvShow.id
+                        }
+                        TvShow(
+                            id = serverTvShow.id,
+                            title = serverTvShow.name,
+                            releaseDate = serverTvShow.first_air_date,
+                            lastAirDate = serverTvShow.last_air_date,
+                            status = serverTvShow.status,
+                            popularity = serverTvShow.popularity,
+                            voteAverage = serverTvShow.vote_average,
+                            voteCount = serverTvShow.vote_count,
+                            overview = serverTvShow.overview,
+                            backdropPath = serverTvShow.backdrop_path,
+                            posterPath = serverTvShow.poster_path,
+                            homepage = serverTvShow.homepage,
+                            isWatchlist = isWatchlist
+                        )
+                    }
+                movieDb.withTransaction {
+                    movieDao.insertTvShows(tvShows)
+                }
+            },
+            shouldFetch = { cachedTvShows ->
+                if (forceRefresh) {
+                    true
+                } else {
+                    val sortedTvShows = cachedTvShows.sortedBy { tvShow ->
+                        tvShow.updatedAt
+                    }
+                    val oldestTimestamp = sortedTvShows.firstOrNull()?.updatedAt
+                    val needsRefresh = oldestTimestamp == null ||
+                            oldestTimestamp < System.currentTimeMillis() -
+                            TimeUnit.DAYS.toMillis(1)
+                    needsRefresh
+                }
+            },
+            onFetchSuccess = onFetchSuccess,
+            onFetchFailed = { t ->
+                if (t !is HttpException && t !is IOException) {
+                    throw t
+                }
+                onFetchFailed(t)
+            }
+        )
+
+    fun getAllWatchlistMedia(): Flow<List<ListItem>> =
+        movieDao.getAllWatchlistMedia()
+
+    suspend fun updateMovie(movie: Movie) {
         movieDao.updateMovie(movie)
     }
 
-    suspend fun updateTvShow(tvShow: TvShow){
+    suspend fun updateTvShow(tvShow: TvShow) {
         movieDao.updateTvShow(tvShow)
     }
 
@@ -203,8 +286,13 @@ class MovieRepository @Inject constructor(
         return movieDao.getMovie(id)
     }
 
-    suspend fun getTvShow(id: Int): TvShow{
+    suspend fun getTvShow(id: Int): TvShow {
         return movieDao.getTvShow(id)
+    }
+
+    suspend fun resetWatchlist() {
+        movieDao.resetAllMovieWatchlist()
+        movieDao.resetAllTvShowWatchlist()
     }
 
     suspend fun deleteNonWatchlistMoviesAndTvShowsOlderThan(timestampInMillis: Long) {

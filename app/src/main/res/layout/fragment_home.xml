@@ -13,9 +13,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view_top_movies"
@@ -33,6 +33,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/recycler_view_popular_movies" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_popular_tv_shows"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/recycler_view_top_tv_shows" />
 
                 <TextView
                     android:id="@+id/text_view_error"
@@ -54,7 +60,7 @@
                     android:visibility="gone"
                     tools:visibility="visible" />
 
-        </RelativeLayout>
+            </RelativeLayout>
 
         </ScrollView>
 

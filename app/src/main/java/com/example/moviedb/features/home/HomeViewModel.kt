@@ -1,6 +1,7 @@
 package com.example.moviedb.features.home
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.moviedb.data.ListItem
 import com.example.moviedb.data.MovieRepository
@@ -21,15 +22,19 @@ class HomeViewModel @Inject constructor(
     val events = eventChannel.receiveAsFlow()
 
     private val refreshTriggerChannel = Channel<Refresh>()
-    private val refreshTrigger = refreshTriggerChannel.receiveAsFlow()
+    private val refreshTrigger =
+        refreshTriggerChannel.receiveAsFlow().shareIn(viewModelScope, SharingStarted.Lazily, 1)
 
-    var pendingScrollToTopAfterRefresh = false
+    var top20MoviesPendingScrollToTopAfterRefresh = false
+    var popular20MoviesPendingScrollToTopAfterRefresh = false
+    var top20TvShowsPendingScrollToTopAfterRefresh = false
+    var popular20TvShowsPendingScrollToTopAfterRefresh = false
 
-    val top20Movies = refreshTrigger.flatMapLatest{ refresh ->
+    val top20Movies = refreshTrigger.flatMapLatest { refresh ->
         repository.getTop20Movies(
             refresh == Refresh.FORCE,
             onFetchSuccess = {
-                pendingScrollToTopAfterRefresh = true
+                top20MoviesPendingScrollToTopAfterRefresh = true
             },
             onFetchFailed = { t ->
                 viewModelScope.launch { eventChannel.send(Event.ShowErrorMessage(t)) }
@@ -41,7 +46,7 @@ class HomeViewModel @Inject constructor(
         repository.getPopular20Movies(
             refresh == Refresh.FORCE,
             onFetchSuccess = {
-                pendingScrollToTopAfterRefresh = true
+                popular20MoviesPendingScrollToTopAfterRefresh = true
             },
             onFetchFailed = { t ->
                 viewModelScope.launch { eventChannel.send(Event.ShowErrorMessage(t)) }
@@ -53,7 +58,19 @@ class HomeViewModel @Inject constructor(
         repository.getTop20TvShows(
             refresh == Refresh.FORCE,
             onFetchSuccess = {
-                pendingScrollToTopAfterRefresh = true
+                top20TvShowsPendingScrollToTopAfterRefresh = true
+            },
+            onFetchFailed = { t ->
+                viewModelScope.launch { eventChannel.send(Event.ShowErrorMessage(t)) }
+            }
+        )
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    val popular20TvShows = refreshTrigger.flatMapLatest { refresh ->
+        repository.getPopular20TvShows(
+            refresh == Refresh.FORCE,
+            onFetchSuccess = {
+                popular20TvShowsPendingScrollToTopAfterRefresh = true
             },
             onFetchFailed = { t ->
                 viewModelScope.launch { eventChannel.send(Event.ShowErrorMessage(t)) }
@@ -70,7 +87,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onStart() {
-        if (top20Movies.value !is Resource.Loading && popular20Movies.value !is Resource.Loading && top20TvShows.value !is Resource.Loading) {
+        if (top20Movies.value !is Resource.Loading ||
+            popular20Movies.value !is Resource.Loading ||
+            top20TvShows.value !is Resource.Loading ||
+            popular20TvShows.value !is Resource.Loading
+        ) {
             viewModelScope.launch {
                 refreshTriggerChannel.send(Refresh.NORMAL)
             }
@@ -78,7 +99,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onManualRefresh() {
-        if (top20Movies.value !is Resource.Loading && popular20Movies.value !is Resource.Loading && top20TvShows.value !is Resource.Loading) {
+        if (top20Movies.value !is Resource.Loading ||
+            popular20Movies.value !is Resource.Loading ||
+            top20TvShows.value !is Resource.Loading ||
+            popular20TvShows.value !is Resource.Loading
+        ) {
             viewModelScope.launch {
                 refreshTriggerChannel.send(Refresh.FORCE)
             }
@@ -97,7 +122,7 @@ class HomeViewModel @Inject constructor(
                 else -> {
                     val tvShow = repository.getTvShow(listItem.id)
                     val currentlyWatchlist = tvShow.isWatchlist
-                    val updatedTvShow= tvShow.copy(isWatchlist = !currentlyWatchlist)
+                    val updatedTvShow = tvShow.copy(isWatchlist = !currentlyWatchlist)
                     repository.updateTvShow(updatedTvShow)
                 }
             }

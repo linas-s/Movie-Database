@@ -21,6 +21,21 @@ interface MovieDao {
     @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show ORDER BY voteAverage DESC LIMIT 20")
     fun getTop20TvShows(): Flow<List<ListItem>>
 
+    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show ORDER BY popularity DESC LIMIT 20")
+    fun getPopular20TvShows(): Flow<List<ListItem>>
+
+    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE isWatchlist = 1")
+    fun getAllWatchlistMovies(): Flow<List<ListItem>>
+
+    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show WHERE isWatchlist = 1")
+    fun getAllWatchlistTvShows(): Flow<List<ListItem>>
+
+    @Query(
+        "SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE isWatchlist = 1 UNION " +
+                "SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show WHERE isWatchlist = 1"
+    )
+    fun getAllWatchlistMedia(): Flow<List<ListItem>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovies(movies: List<Movie>)
 
@@ -32,6 +47,12 @@ interface MovieDao {
 
     @Update
     suspend fun updateTvShow(tvShow: TvShow)
+
+    @Query("UPDATE movie SET isWatchlist = 0")
+    suspend fun resetAllMovieWatchlist()
+
+    @Query("UPDATE tv_show SET isWatchlist = 0")
+    suspend fun resetAllTvShowWatchlist()
 
     @Query("DELETE from movie WHERE updatedAt < :timestampInMillis AND isWatchlist = 0")
     suspend fun deleteNonWatchlistMoviesOlderThan(timestampInMillis: Long)
