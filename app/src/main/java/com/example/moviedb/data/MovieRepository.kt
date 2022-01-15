@@ -274,10 +274,10 @@ class MovieRepository @Inject constructor(
             }
         )
 
-    fun getSearchResultsPaged(query: String): Flow<PagingData<SearchListItem>> =
+    fun getSearchResultsPaged(query: String, refreshOnInit: Boolean): Flow<PagingData<SearchListItem>> =
         Pager(
             config = PagingConfig(pageSize = 20, maxSize = 200),
-            remoteMediator = SearchMediaRemoteMediator(query, movieApi, movieDb),
+            remoteMediator = SearchMediaRemoteMediator(query, movieApi, movieDb, refreshOnInit),
             pagingSourceFactory = { movieDao.getSearchResultMediaPaged(query) }
         ).flow
 

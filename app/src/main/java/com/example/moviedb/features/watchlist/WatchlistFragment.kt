@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.moviedb.MainActivity
 import com.example.moviedb.R
 import com.example.moviedb.databinding.FragmentHomeBinding
@@ -40,6 +41,9 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist),
                 viewModel.onWatchlistClick(media)
             }
         )
+
+        watchlistAdapter.stateRestorationPolicy =
+            RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 
         binding.apply {
             recyclerViewWatchlist.apply {

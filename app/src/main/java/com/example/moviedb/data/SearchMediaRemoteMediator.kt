@@ -3,10 +3,8 @@ package com.example.moviedb.data
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.room.PrimaryKey
 import androidx.room.withTransaction
 import com.example.moviedb.api.MovieApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
 import java.io.IOException
@@ -16,7 +14,8 @@ private const val MEDIA_STARTING_PAGE_INDEX = 1
 class SearchMediaRemoteMediator(
     private val searchQuery: String,
     private val movieApi: MovieApi,
-    private val movieDb: MovieDatabase
+    private val movieDb: MovieDatabase,
+    private val refreshOnInit: Boolean
 ) : RemoteMediator<Int, SearchListItem>() {
 
     private val movieDao = movieDb.movieDao()
@@ -129,6 +128,14 @@ class SearchMediaRemoteMediator(
             return MediatorResult.Error(exception)
         } catch (exception: HttpException) {
             return MediatorResult.Error(exception)
+        }
+    }
+
+    override suspend fun initialize(): InitializeAction {
+        return if (refreshOnInit) {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        } else {
+            InitializeAction.SKIP_INITIAL_REFRESH
         }
     }
 }
