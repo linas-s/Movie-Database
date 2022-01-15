@@ -34,4 +34,11 @@ interface MovieApi {
         @Query("api_key") apiKey: String = API_KEY,
         @Query("page") page: Int
     ): TvShowsListResponse
+
+    @GET("search/multi")
+    suspend fun searchMedia(
+        @Query("api_key") apiKey: String = API_KEY,
+        @Query("query") query: String,
+        @Query("page") page: Int
+    ): SearchListResponse
 }

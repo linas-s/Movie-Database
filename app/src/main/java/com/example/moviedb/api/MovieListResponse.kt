@@ -7,3 +7,7 @@ data class MovieListResponse(
 data class TvShowsListResponse(
     val results: List<TvShowDto>
 )
+
+data class SearchListResponse(
+    val results: List<SearchDto>
+)

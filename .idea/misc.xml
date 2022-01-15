@@ -11,11 +11,15 @@
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/drawable/ic_watchlist_selected.xml" value="0.1" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/drawable/ic_watchlist_unselected.xml" value="0.1" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/activity_main.xml" value="0.264" />
-        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_home.xml" value="0.4" />
-        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_search.xml" value="0.2" />
+        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_home.xml" value="0.264" />
+        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_search.xml" value="0.4" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_watchlist.xml" value="0.4" />
+        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/item_list_item.xml" value="0.4041666666666667" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/item_movie.xml" value="0.4" />
+        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/item_search_list_item.xml" value="0.4041666666666667" />
+        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/load_state_footer.xml" value="0.11018518518518519" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/menu/menu_bottom_nav.xml" value="0.1" />
+        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/menu/menu_search_media.xml" value="0.1" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/menu/menu_watchlist.xml" value="0.1" />
       </map>
     </option>

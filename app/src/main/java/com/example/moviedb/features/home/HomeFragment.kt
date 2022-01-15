@@ -3,6 +3,7 @@ package com.example.moviedb.features.home
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -10,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.moviedb.MainActivity
 import com.example.moviedb.R
 import com.example.moviedb.databinding.FragmentHomeBinding
 import com.example.moviedb.shared.ListItemAdapter
@@ -21,14 +23,18 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class HomeFragment : Fragment(R.layout.fragment_home) {
+class HomeFragment : Fragment(R.layout.fragment_home),
+    MainActivity.OnBottomNavigationFragmentReselectedListener {
 
     private val viewModel: HomeViewModel by viewModels()
+
+    private var currentBinding: FragmentHomeBinding? = null
+    private val binding get() = currentBinding!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val binding = FragmentHomeBinding.bind(view)
+        currentBinding = FragmentHomeBinding.bind(view)
 
         val topMovieAdapter = ListItemAdapter(
             onItemClick = { movie ->
@@ -131,6 +137,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 launch {
                     viewModel.popular20Movies.collect {
                         val result = it ?: return@collect
+
                         popularMovieAdapter.submitList(result.data) {
                             if (viewModel.popular20MoviesPendingScrollToTopAfterRefresh) {
                                 recyclerViewPopularMovies.scrollToPosition(0)
@@ -143,6 +150,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 launch {
                     viewModel.top20TvShows.collect {
                         val result = it ?: return@collect
+
                         topTvShowAdapter.submitList(result.data) {
                             if (viewModel.top20TvShowsPendingScrollToTopAfterRefresh) {
                                 recyclerViewTopTvShows.scrollToPosition(0)
@@ -155,6 +163,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 launch {
                     viewModel.popular20TvShows.collect {
                         val result = it ?: return@collect
+
                         popularTvShowAdapter.submitList(result.data) {
                             if (viewModel.popular20TvShowsPendingScrollToTopAfterRefresh) {
                                 recyclerViewPopularTvShows.scrollToPosition(0)
@@ -193,5 +202,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onStart() {
         super.onStart()
         viewModel.onStart()
+    }
+
+    override fun onBottomNavigationFragmentReselected() {
+        binding.scrollView.scrollTo(0, 0)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        currentBinding = null
     }
 }

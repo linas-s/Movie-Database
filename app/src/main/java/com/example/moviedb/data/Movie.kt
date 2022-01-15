@@ -57,3 +57,33 @@ data class ListItem(
 ){
     val posterUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
 }
+
+@Entity(tableName = "person")
+data class Person(
+    @PrimaryKey val id: Int,
+    val title: String,
+    val posterPath: String?,
+    val popularity: Double,
+    val knownForDepartment: String,
+    val birthday: String?,
+    val deathDay: String?,
+    val homepage: String?
+)
+
+@Entity (tableName = "search_results", primaryKeys = ["searchQuery", "mediaType", "id"])
+data class SearchResult(
+    val searchQuery: String,
+    val mediaType: String,
+    val id: Int,
+    val queryPosition: Int
+)
+
+data class SearchListItem(
+    val id: Int,
+    val mediaType: String,
+    val title: String,
+    val posterPath: String?,
+    val isWatchlist: Boolean?
+) {
+    val posterUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
+}

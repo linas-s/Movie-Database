@@ -28,3 +28,20 @@ data class TvShowDto(
     val poster_path: String?,
     val homepage: String?
 )
+
+data class SearchDto(
+    val id: Int,
+    val media_type: String,
+    val popularity: Double,
+    val overview: String?,
+    val poster_path: String?,
+    val backdrop_path: String?,
+    val vote_average: Double?,
+    val vote_count: Int?,
+    val name: String?,
+    val profile_path: String?,
+    val release_date: String?,
+    val title: String?,
+    val known_for_department: String?,
+    val first_air_date: String?
+)

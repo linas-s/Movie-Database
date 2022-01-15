@@ -13,4 +13,6 @@
     <string name="title_search">Search the database</string>
     <string name="title_watchlist">Your watchlist</string>
     <string name="delete_watchlist">Delete watchlist</string>
+    <string name="search_the_database">Search the database</string>
+    <string name="could_not_load_search_results">Could not load search results: %s</string>
 </resources>

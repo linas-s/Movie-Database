@@ -1,5 +1,8 @@
 package com.example.moviedb.data
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.room.withTransaction
 import com.example.moviedb.api.MovieApi
 import com.example.moviedb.util.Resource
@@ -270,6 +273,13 @@ class MovieRepository @Inject constructor(
                 onFetchFailed(t)
             }
         )
+
+    fun getSearchResultsPaged(query: String): Flow<PagingData<SearchListItem>> =
+        Pager(
+            config = PagingConfig(pageSize = 20, maxSize = 200),
+            remoteMediator = SearchMediaRemoteMediator(query, movieApi, movieDb),
+            pagingSourceFactory = { movieDao.getSearchResultMediaPaged(query) }
+        ).flow
 
     fun getAllWatchlistMedia(): Flow<List<ListItem>> =
         movieDao.getAllWatchlistMedia()
