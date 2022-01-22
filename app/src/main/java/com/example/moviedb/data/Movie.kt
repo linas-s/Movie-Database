@@ -1,10 +1,13 @@
 package com.example.moviedb.data
 
+import android.os.Parcelable
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.coroutines.flow.Flow
+import kotlinx.parcelize.Parcelize
 
 @Entity(tableName = "movie")
+@Parcelize
 data class Movie(
     @PrimaryKey val id: Int,
     val title: String,
@@ -16,12 +19,16 @@ data class Movie(
     val backdropPath: String?,
     val posterPath: String?,
     val homepage: String?,
+    val tagline: String?,
     val runtime: Int?,
+    val budget: Int?,
+    val status: String?,
     val isWatchlist: Boolean,
     val updatedAt: Long = System.currentTimeMillis()
-){
+) : Parcelable {
+    val releaseYear: String get() = releaseDate.take(4)
     val posterUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
-    val backdropUrl: String get() = "https://image.tmdb.org/t/p/w500$backdropPath"
+    val backdropUrl: String get() = "https://image.tmdb.org/t/p/original$backdropPath"
 }
 
 @Entity(tableName = "tv_show")
@@ -40,7 +47,7 @@ data class TvShow(
     val homepage: String?,
     val isWatchlist: Boolean,
     val updatedAt: Long = System.currentTimeMillis()
-){
+) {
     val posterUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
     val backdropUrl: String get() = "https://image.tmdb.org/t/p/w500$backdropPath"
 }
@@ -54,7 +61,7 @@ data class ListItem(
     val isWatchlist: Boolean,
     val updatedAt: Long,
     val mediaType: String
-){
+) {
     val posterUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
 }
 
@@ -70,7 +77,7 @@ data class Person(
     val homepage: String?
 )
 
-@Entity (tableName = "search_results", primaryKeys = ["searchQuery", "mediaType", "id"])
+@Entity(tableName = "search_results", primaryKeys = ["searchQuery", "mediaType", "id"])
 data class SearchResult(
     val searchQuery: String,
     val mediaType: String,
@@ -87,3 +94,45 @@ data class SearchListItem(
 ) {
     val posterUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
 }
+
+@Entity(tableName = "credits", primaryKeys = ["mediaType", "personId", "job"])
+data class Credits(
+    val mediaType: String,
+    val mediaId: Int,
+    val personId: Int,
+    val job: String,
+    val character: String?,
+    val listOrder: Int
+)
+
+data class CastCrewPerson(
+    val id: Int,
+    val title: String,
+    val posterPath: String?,
+    val character: String?,
+    val job: String?,
+    val listOrder: Int,
+    val popularity: Double
+) {
+    val profileUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
+    val initials: String
+        get() = title
+            .split(' ')
+            .mapNotNull { it.firstOrNull()?.toString() }
+            .reduce { acc, s -> acc + s }
+}
+
+@Entity(tableName = "media_genre", primaryKeys = ["mediaType", "id", "genreId"])
+data class MediaGenre(
+    val mediaType: String,
+    val id: Int,
+    val genreId: Int,
+    val genreName: String
+)
+
+@Entity(tableName = "media_recommendation", primaryKeys = ["mediaType", "id", "recommendedId"])
+data class MediaRecommendation(
+    val mediaType: String,
+    val id: Int,
+    val recommendedId: Int
+)

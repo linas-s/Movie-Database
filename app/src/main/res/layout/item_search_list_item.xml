@@ -21,7 +21,7 @@
         android:src="@drawable/ic_watchlist_unselected"
         app:layout_constraintLeft_toLeftOf="@id/image_view_poster"
         app:layout_constraintTop_toTopOf="@id/image_view_poster"
-        app:tint="#FFEB3B" />
+        app:tint="#0fc556" />
 
     <TextView
         android:id="@+id/text_view_title"

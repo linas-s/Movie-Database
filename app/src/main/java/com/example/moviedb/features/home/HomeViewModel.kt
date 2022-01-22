@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.moviedb.data.ListItem
+import com.example.moviedb.data.Movie
 import com.example.moviedb.data.MovieRepository
 import com.example.moviedb.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -129,11 +130,31 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun onItemListClick(listItem: ListItem) {
+        viewModelScope.launch {
+            when (listItem.mediaType) {
+                "movie" -> {
+                    val movie = repository.getMovie(listItem.id)
+                    onMovieSelected(movie)
+                }
+                else -> {
+
+                }
+            }
+        }
+    }
+
+    private fun onMovieSelected(movie: Movie) = viewModelScope.launch {
+        eventChannel.send(Event.NavigateToMovieDetailsFragment(movie))
+    }
+
     enum class Refresh {
         FORCE, NORMAL
     }
 
     sealed class Event {
         data class ShowErrorMessage(val error: Throwable) : Event()
+        data class NavigateToMovieDetailsFragment(val movie: Movie) : Event()
     }
+
 }

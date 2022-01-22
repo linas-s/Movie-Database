@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import com.example.moviedb.data.MovieRepository
-import com.example.moviedb.data.SearchListItem
+import com.example.moviedb.data.*
+import com.example.moviedb.features.home.HomeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,6 +21,9 @@ class SearchViewModel @Inject constructor(
     private val repository: MovieRepository,
     state: SavedStateHandle
 ) : ViewModel() {
+
+    private val eventChannel = Channel<Event>()
+    val events = eventChannel.receiveAsFlow()
 
     private val currentQuery = state.getLiveData<String?>("currentQuery", null)
 
@@ -54,6 +59,34 @@ class SearchViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun onSearchItemClick(searchListItem: SearchListItem) {
+        viewModelScope.launch {
+            when (searchListItem.mediaType) {
+                "movie" -> {
+                    val movie = repository.getMovie(searchListItem.id)
+                    onMovieSelected(movie)
+                }
+                "tv_show" -> {
+                    val tvShow = repository.getTvShow(searchListItem.id)
+                    onTvShowSelected(tvShow)
+                }
+            }
+        }
+    }
+
+    private fun onMovieSelected(movie: Movie) = viewModelScope.launch {
+        eventChannel.send(Event.NavigateToMovieDetailsFragment(movie))
+    }
+
+    private fun onTvShowSelected(tvShow: TvShow) = viewModelScope.launch {
+
+    }
+
+    sealed class Event {
+        data class NavigateToMovieDetailsFragment(val movie: Movie) : Event()
+        data class NavigateToTvShowDetailsFragment(val tvShow: TvShow) : Event()
     }
 
 }

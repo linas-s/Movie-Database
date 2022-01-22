@@ -13,6 +13,9 @@ interface MovieDao {
     @Query("SELECT * FROM tv_show WHERE id = :id")
     suspend fun getTvShow(id: Int): TvShow
 
+    @Query("SELECT * FROM movie WHERE id = :id")
+    fun getMovieFlow(id: Int): Flow<Movie>
+
     @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie ORDER BY voteAverage DESC LIMIT 20")
     fun getTop20Movies(): Flow<List<ListItem>>
 
@@ -43,6 +46,36 @@ interface MovieDao {
     @Query("SELECT MAX(queryPosition) FROM search_results WHERE searchQuery = :searchQuery")
     suspend fun getLastQueryPosition(searchQuery: String): Int?
 
+    @Query(
+        "SELECT p.id, p.title, p.posterPath, p.popularity, c.character, c.job, c.listOrder FROM Person p\n" +
+                "INNER JOIN\n" +
+                "Credits c on p.id = c.personId\n" +
+                "WHERE c.mediaId = :movieId AND c.character IS NOT NULL \n" +
+                "ORDER BY listOrder"
+    )
+    fun getMovieCast(movieId: Int): Flow<List<CastCrewPerson>>
+
+    @Query(
+        "SELECT p.id, p.title, p.posterPath, p.popularity, c.character, c.job, c.listOrder FROM Person p\n" +
+                "INNER JOIN\n" +
+                "Credits c on p.id = c.personId\n" +
+                "WHERE c.mediaId = :movieId AND c.character IS NULL \n" +
+                "ORDER BY popularity DESC"
+    )
+    fun getMovieCrew(movieId: Int): Flow<List<CastCrewPerson>>
+
+    @Query("SELECT m.id, m.title, m.releaseDate, m.posterPath, m.voteAverage, m.isWatchlist, m.updatedAt, 'movie' AS mediaType FROM movie m INNER JOIN media_recommendation r ON r.recommendedId = m.id WHERE r.mediaType = 'movie' AND r.id = :movieId")
+    fun getRecommendedMovies(movieId: Int) :Flow<List<ListItem>>
+
+    @Query("SELECT * FROM media_genre WHERE id = :movieId AND mediaType = 'movie'")
+    fun getMovieGenres(movieId: Int): Flow<List<MediaGenre>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMovie(movie: Movie)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRecommendations(recommendations: List<MediaRecommendation>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovies(movies: List<Movie>)
 
@@ -54,6 +87,12 @@ interface MovieDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSearchResults(searchResults: List<SearchResult>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCredits(credits: List<Credits>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMediaGenres(mediaGenres: List<MediaGenre>)
 
     @Update
     suspend fun updateMovie(movie: Movie)

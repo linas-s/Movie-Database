@@ -1,18 +1,18 @@
 package com.example.moviedb.features.home
 
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.ScrollView
+import android.view.WindowManager
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.moviedb.MainActivity
 import com.example.moviedb.R
 import com.example.moviedb.databinding.FragmentHomeBinding
 import com.example.moviedb.shared.ListItemAdapter
@@ -24,8 +24,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class HomeFragment : Fragment(R.layout.fragment_home),
-    MainActivity.OnBottomNavigationFragmentReselectedListener {
+class HomeFragment : Fragment(R.layout.fragment_home){
 
     private val viewModel: HomeViewModel by viewModels()
 
@@ -38,38 +37,38 @@ class HomeFragment : Fragment(R.layout.fragment_home),
         currentBinding = FragmentHomeBinding.bind(view)
 
         val topMovieAdapter = ListItemAdapter(
-            onItemClick = { movie ->
-
+            onItemClick = { item ->
+                viewModel.onItemListClick(item)
             },
-            onWatchlistClick = { movie ->
-                viewModel.onWatchlistClick(movie)
+            onWatchlistClick = { item ->
+                viewModel.onWatchlistClick(item)
             }
         )
 
         val popularMovieAdapter = ListItemAdapter(
-            onItemClick = { movie ->
-
+            onItemClick = { item ->
+                viewModel.onItemListClick(item)
             },
-            onWatchlistClick = { movie ->
-                viewModel.onWatchlistClick(movie)
+            onWatchlistClick = { item ->
+                viewModel.onWatchlistClick(item)
             }
         )
 
         val topTvShowAdapter = ListItemAdapter(
-            onItemClick = { tvShow ->
+            onItemClick = { item ->
 
             },
-            onWatchlistClick = { tvShow ->
-                viewModel.onWatchlistClick(tvShow)
+            onWatchlistClick = { item ->
+                viewModel.onWatchlistClick(item)
             }
         )
 
         val popularTvShowAdapter = ListItemAdapter(
-            onItemClick = { tvShow ->
+            onItemClick = { item ->
 
             },
-            onWatchlistClick = { tvShow ->
-                viewModel.onWatchlistClick(tvShow)
+            onWatchlistClick = { item ->
+                viewModel.onWatchlistClick(item)
             }
         )
 
@@ -86,6 +85,14 @@ class HomeFragment : Fragment(R.layout.fragment_home),
             RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 
         binding.apply {
+
+            toolbar.apply {
+                setNavigationOnClickListener { findNavController().navigateUp() }
+                title = "Home"
+            }
+
+            requireActivity().window.statusBarColor = Color.parseColor("#445565")
+
             recyclerViewTopMovies.apply {
                 adapter = topMovieAdapter
                 layoutManager =
@@ -206,6 +213,14 @@ class HomeFragment : Fragment(R.layout.fragment_home),
                                         ?: getString(R.string.unknown_error_occurred)
                                 )
                             )
+                        is HomeViewModel.Event.NavigateToMovieDetailsFragment -> {
+                            val action =
+                                HomeFragmentDirections.actionHomeFragmentToMovieDetailsFragment(
+                                    event.movie,
+                                    event.movie.title
+                                )
+                            findNavController().navigate(action)
+                        }
                     }.exhaustive
                 }
             }
@@ -215,14 +230,5 @@ class HomeFragment : Fragment(R.layout.fragment_home),
     override fun onStart() {
         super.onStart()
         viewModel.onStart()
-    }
-
-    override fun onBottomNavigationFragmentReselected() {
-        binding.scrollView.scrollTo(0, 0)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        currentBinding = null
     }
 }

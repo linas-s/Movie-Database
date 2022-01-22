@@ -15,4 +15,15 @@
     <string name="delete_watchlist">Delete watchlist</string>
     <string name="search_the_database">Search the database</string>
     <string name="could_not_load_search_results">Could not load search results: %s</string>
+    <string name="directed_by">DIRECTED BY</string>
+    <string name="trailer">TRAILER</string>
+    <string name="cast_crew">CAST + CREW</string>
+    <string name="details">DETAILS</string>
+    <string name="genre">GENRE</string>
+    <string name="reviews">Reviews</string>
+    <string name="status">Status</string>
+    <string name="release_date">Release date</string>
+    <string name="budget">Budget</string>
+    <string name="homepage">Homepage</string>
+    <string name="recommended">Recommended</string>
 </resources>

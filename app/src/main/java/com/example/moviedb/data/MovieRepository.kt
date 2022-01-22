@@ -51,6 +51,9 @@ class MovieRepository @Inject constructor(
                             overview = serverMovie.overview,
                             backdropPath = serverMovie.backdrop_path,
                             posterPath = serverMovie.poster_path,
+                            status = null,
+                            budget = null,
+                            tagline = serverMovie.tagline,
                             homepage = serverMovie.homepage,
                             runtime = serverMovie.runtime,
                             isWatchlist = isWatchlist
@@ -112,6 +115,9 @@ class MovieRepository @Inject constructor(
                             voteAverage = serverMovie.vote_average,
                             voteCount = serverMovie.vote_count,
                             overview = serverMovie.overview,
+                            status = null,
+                            budget = null,
+                            tagline = serverMovie.tagline,
                             backdropPath = serverMovie.backdrop_path,
                             posterPath = serverMovie.poster_path,
                             homepage = serverMovie.homepage,
@@ -274,7 +280,213 @@ class MovieRepository @Inject constructor(
             }
         )
 
-    fun getSearchResultsPaged(query: String, refreshOnInit: Boolean): Flow<PagingData<SearchListItem>> =
+    fun getMovieFlow(
+        movie: Movie
+    ): Flow<Resource<Movie>> =
+        networkBoundResource(
+            query = {
+                movieDao.getMovieFlow(movie.id)
+            },
+            fetch = {
+                val movieDetails = movieApi.getMovieDetails(id = movie.id)
+                movieDetails
+            },
+            saveFetchResult = { serverMovieDetails ->
+                val watchList = movieDao.getAllWatchlistMovies().first()
+
+                val isWatchlist = watchList.any { watchListMovie ->
+                    watchListMovie.id == serverMovieDetails.id
+                }
+
+                val movie =
+                    Movie(
+                        id = serverMovieDetails.id,
+                        title = serverMovieDetails.title,
+                        releaseDate = serverMovieDetails.release_date,
+                        popularity = serverMovieDetails.popularity,
+                        voteAverage = serverMovieDetails.vote_average,
+                        voteCount = serverMovieDetails.vote_count,
+                        overview = serverMovieDetails.overview,
+                        status = serverMovieDetails.status,
+                        budget = serverMovieDetails.budget,
+                        tagline = serverMovieDetails.tagline,
+                        backdropPath = serverMovieDetails.backdrop_path,
+                        posterPath = serverMovieDetails.poster_path,
+                        homepage = serverMovieDetails.homepage,
+                        runtime = serverMovieDetails.runtime,
+                        isWatchlist = isWatchlist
+                    )
+
+                val genres = serverMovieDetails.genres.map { genre ->
+                    MediaGenre(
+                        mediaType = "movie",
+                        id = serverMovieDetails.id,
+                        genreId = genre.id,
+                        genreName = genre.name
+                    )
+                }
+                movieDb.withTransaction {
+                    movieDao.insertMovie(movie)
+                    movieDao.insertMediaGenres(genres)
+                }
+            }
+        )
+
+    fun getMovieRecommendations(
+        movie: Movie
+    ): Flow<Resource<List<ListItem>>> =
+        networkBoundResource(
+            query = {
+                movieDao.getRecommendedMovies(movie.id)
+            },
+            fetch = {
+                val response = movieApi.getRecommendedMovies(id = movie.id, page = 1)
+                response.results
+            },
+            saveFetchResult = { serverMovies ->
+                val watchList = movieDao.getAllWatchlistMovies().first()
+
+                val movies =
+                    serverMovies.map { serverMovie ->
+                        val isWatchlist = watchList.any { watchListMovie ->
+                            watchListMovie.id == serverMovie.id
+                        }
+                        Movie(
+                            id = serverMovie.id,
+                            title = serverMovie.title,
+                            releaseDate = serverMovie.release_date,
+                            popularity = serverMovie.popularity,
+                            voteAverage = serverMovie.vote_average,
+                            voteCount = serverMovie.vote_count,
+                            overview = serverMovie.overview,
+                            backdropPath = serverMovie.backdrop_path,
+                            posterPath = serverMovie.poster_path,
+                            status = null,
+                            budget = null,
+                            tagline = serverMovie.tagline,
+                            homepage = serverMovie.homepage,
+                            runtime = serverMovie.runtime,
+                            isWatchlist = isWatchlist
+                        )
+                    }
+                val movieRecommendations =
+                    serverMovies.map { serverMovie ->
+                        MediaRecommendation(
+                            mediaType = "movie",
+                            id = movie.id,
+                            recommendedId = serverMovie.id
+                        )
+                    }
+                movieDb.withTransaction {
+                    movieDao.insertMovies(movies)
+                    movieDao.insertRecommendations(movieRecommendations)
+                }
+            }
+        )
+
+    fun getMovieCast(
+        movie: Movie
+    ): Flow<Resource<List<CastCrewPerson>>> =
+        networkBoundResource(
+            query = {
+                movieDao.getMovieCast(movie.id)
+            },
+            fetch = {
+                val response = movieApi.getMovieCredits(movie.id)
+                response.cast
+            },
+            saveFetchResult = { serverCast ->
+                val cast =
+                    serverCast.map { serverCast ->
+                        Person(
+                            id = serverCast.id,
+                            title = serverCast.name,
+                            posterPath = serverCast.profile_path,
+                            popularity = serverCast.popularity,
+                            knownForDepartment = serverCast.known_for_department,
+                            birthday = null,
+                            deathDay = null,
+                            homepage = null,
+                        )
+                    }
+
+                val credits =
+                    serverCast.map { serverCast ->
+                        Credits(
+                            mediaType = "movie",
+                            mediaId = movie.id,
+                            personId = serverCast.id,
+                            character = serverCast.character,
+                            job = "acting",
+                            listOrder = serverCast.order
+                        )
+                    }
+                movieDb.withTransaction {
+                    movieDao.insertPersons(cast)
+                    movieDao.insertCredits(credits)
+                }
+            }
+        )
+
+    fun getMovieCrew(
+        movie: Movie
+    ): Flow<Resource<List<CastCrewPerson>>> =
+        networkBoundResource(
+            query = {
+                movieDao.getMovieCrew(movie.id)
+            },
+            fetch = {
+                val response = movieApi.getMovieCredits(movie.id)
+                response.crew
+            },
+            saveFetchResult = { serverCrew ->
+                val crew =
+                    serverCrew.map { serverCrew ->
+                        Person(
+                            id = serverCrew.id,
+                            title = serverCrew.name,
+                            posterPath = serverCrew.profile_path,
+                            popularity = serverCrew.popularity,
+                            knownForDepartment = serverCrew.known_for_department,
+                            birthday = null,
+                            deathDay = null,
+                            homepage = null,
+                        )
+                    }
+
+                val credits =
+                    serverCrew.map { serverCrew ->
+                        Credits(
+                            mediaType = "movie",
+                            mediaId = movie.id,
+                            personId = serverCrew.id,
+                            character = null,
+                            job = serverCrew.job,
+                            listOrder = serverCrew.order
+                        )
+                    }
+                movieDb.withTransaction {
+                    movieDao.insertPersons(crew)
+                    movieDao.insertCredits(credits)
+                }
+            }
+        )
+
+    fun getMovieGenres(
+        movie: Movie
+    ): Flow<Resource<List<MediaGenre>>> =
+        networkBoundResource(
+            query = {
+                movieDao.getMovieGenres(movie.id)
+            },
+            fetch = { },
+            saveFetchResult = { }
+        )
+
+    fun getSearchResultsPaged(
+        query: String,
+        refreshOnInit: Boolean
+    ): Flow<PagingData<SearchListItem>> =
         Pager(
             config = PagingConfig(pageSize = 20, maxSize = 200),
             remoteMediator = SearchMediaRemoteMediator(query, movieApi, movieDb, refreshOnInit),

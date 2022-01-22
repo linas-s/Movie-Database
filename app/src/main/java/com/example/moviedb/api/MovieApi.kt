@@ -2,6 +2,7 @@ package com.example.moviedb.api
 
 import com.example.moviedb.BuildConfig
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MovieApi {
@@ -41,4 +42,23 @@ interface MovieApi {
         @Query("query") query: String,
         @Query("page") page: Int
     ): SearchListResponse
+
+    @GET("movie/{id}/credits")
+    suspend fun getMovieCredits(
+        @Path("id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY,
+    ): CreditsResponse
+
+    @GET("movie/{id}")
+    suspend fun getMovieDetails(
+        @Path("id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY
+    ): MovieDetailsDto
+
+    @GET("movie/{id}/recommendations")
+    suspend fun getRecommendedMovies(
+        @Path("id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY,
+        @Query("page") page: Int
+    ): MovieListResponse
 }

@@ -55,6 +55,9 @@ class SearchMediaRemoteMediator(
                     overview = serverSearchResultMedia.overview,
                     backdropPath = serverSearchResultMedia.backdrop_path,
                     posterPath = serverSearchResultMedia.poster_path,
+                    status = null,
+                    budget = null,
+                    tagline = null,
                     homepage = null,
                     runtime = null,
                     isWatchlist = isWatchlist

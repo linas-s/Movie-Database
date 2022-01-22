@@ -8,7 +8,10 @@ import androidx.room.RoomDatabase
         Movie::class,
         TvShow::class, Person::class,
         SearchResult::class,
-        SearchQueryRemoteKey::class
+        SearchQueryRemoteKey::class,
+        Credits::class,
+        MediaGenre::class,
+        MediaRecommendation::class
     ],
     version = 1
 )
