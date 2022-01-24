@@ -9,10 +9,7 @@ import com.example.moviedb.data.*
 import com.example.moviedb.features.home.HomeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,6 +24,8 @@ class SearchViewModel @Inject constructor(
 
     private val currentQuery = state.getLiveData<String?>("currentQuery", null)
 
+    val hasCurrentQuery = currentQuery.asFlow().map { it != null }
+
     private var refreshOnInit = false
 
     val searchResults = currentQuery.asFlow().flatMapLatest { query ->
@@ -36,10 +35,16 @@ class SearchViewModel @Inject constructor(
     }.cachedIn(viewModelScope)
 
     var refreshInProgress = false
+    var pendingScrollToTopAfterRefresh = false
+
+    var newQueryInProgress = false
+    var pendingScrollToTopAfterNewQuery = false
 
     fun onSearchQuerySubmit(query: String){
         refreshOnInit = true
         currentQuery.value = query
+        newQueryInProgress = true
+        pendingScrollToTopAfterNewQuery = true
     }
 
     fun onWatchlistClick(searchListItem: SearchListItem) {

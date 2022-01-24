@@ -10,20 +10,23 @@
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
         android:background="@android:color/transparent"
-        app:elevation="0dp"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        app:elevation="0dp">
 
-        <Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="?attr/actionBarTheme" />
+            <Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="?attr/actionBarTheme" />
+
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
+        android:id="@+id/scroll_view"
+        android:fillViewport="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -35,7 +38,7 @@
             <ImageView
                 android:id="@+id/image_view_backdrop"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
+                android:layout_height="220dp"
                 android:scaleType="centerCrop"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -44,10 +47,19 @@
                 tools:srcCompat="@tools:sample/backgrounds/scenic"
                 tools:visibility="visible" />
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/gradient"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_backdrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <ImageView
                 android:id="@+id/image_view_poster"
-                android:layout_width="120dp"
-                android:layout_height="180dp"
+                android:layout_width="100dp"
+                android:layout_height="150dp"
+                android:layout_margin="10dp"
                 android:scaleType="centerCrop"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -59,12 +71,14 @@
                 android:id="@+id/text_view_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:textColor="@color/white"
                 android:textSize="24sp"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toStartOf="@+id/image_view_poster"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/image_view_poster"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_backdrop"
                 tools:text="title"
                 tools:visibility="visible" />
 
@@ -72,24 +86,29 @@
                 android:id="@+id/text_view_directed_by"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="10dp"
                 android:text="@string/directed_by"
                 android:visibility="invisible"
-                app:layout_constraintBottom_toTopOf="@+id/text_view_director"
                 app:layout_constraintEnd_toStartOf="@+id/image_view_poster"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_title"
                 tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/text_view_director"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:fontFamily="@font/graphik_bold"
                 android:visibility="invisible"
-                app:layout_constraintBottom_toTopOf="@+id/text_view_rating"
                 app:layout_constraintEnd_toStartOf="@+id/image_view_poster"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_title"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_directed_by"
                 tools:text="Director"
                 tools:visibility="visible" />
 
@@ -97,8 +116,11 @@
                 android:id="@+id/text_view_release_date_runtime"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
                 android:visibility="invisible"
-                app:layout_constraintBottom_toTopOf="@+id/text_view_rating"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_poster"
                 app:layout_constraintEnd_toStartOf="@+id/text_view_trailer"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
@@ -110,11 +132,15 @@
                 android:id="@+id/text_view_trailer"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
                 android:gravity="center_horizontal"
                 android:text="@string/trailer"
+                android:textColor="@color/white"
                 android:textSize="16sp"
                 android:visibility="invisible"
-                app:layout_constraintBottom_toTopOf="@+id/text_view_rating"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_poster"
                 app:layout_constraintEnd_toStartOf="@+id/image_view_poster"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/text_view_release_date_runtime"
@@ -125,8 +151,11 @@
                 android:id="@+id/text_view_tagline"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:textAllCaps="true"
                 android:visibility="invisible"
-                app:layout_constraintEnd_toStartOf="@+id/text_view_rating"
+                app:layout_constraintBottom_toTopOf="@+id/text_view_overview"
+                app:layout_constraintEnd_toStartOf="@+id/image_view_poster"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/text_view_rating"
                 tools:text="Tagline"
@@ -136,24 +165,26 @@
                 android:id="@+id/text_view_overview"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_margin="10dp"
                 android:ellipsize="end"
+                android:lineSpacingExtra="6sp"
                 android:maxLines="3"
                 android:transitionName="overview"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_tagline"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_vote_count"
                 tools:text="overview"
                 tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/text_view_rating"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="@+id/image_view_poster"
-                app:layout_constraintStart_toStartOf="@+id/image_view_poster"
+                app:layout_constraintStart_toEndOf="@+id/image_view_star"
                 app:layout_constraintTop_toBottomOf="@+id/image_view_poster"
                 tools:text="rating"
                 tools:visibility="visible" />
@@ -162,10 +193,11 @@
                 android:id="@+id/view_overview_container"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
+                android:layout_margin="10dp"
                 app:layout_constraintBottom_toBottomOf="@+id/image_view_expand"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/text_view_overview" />
+                app:layout_constraintTop_toBottomOf="@+id/text_view_vote_count" />
 
             <ImageView
                 android:id="@+id/image_view_expand"
@@ -218,24 +250,44 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />
 
+            <TextView
+                android:id="@+id/text_view_cast"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/cast"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tab_layout" />
+
+            <TextView
+                android:id="@+id/text_view_crew"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/crew"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recycler_view_cast" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view_cast"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tab_layout" />
+                app:layout_constraintTop_toBottomOf="@+id/text_view_cast" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view_crew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/recycler_view_cast" />
+                app:layout_constraintTop_toBottomOf="@+id/text_view_crew" />
 
             <TextView
                 android:id="@+id/text_view_status_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
                 android:text="@string/status"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tab_layout" />
@@ -244,6 +296,7 @@
                 android:id="@+id/text_view_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_status_text"
                 tools:text="Status" />
@@ -252,6 +305,8 @@
                 android:id="@+id/text_view_release_date_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
                 android:text="@string/release_date"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_status" />
@@ -260,6 +315,7 @@
                 android:id="@+id/text_view_release_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_release_date_text"
                 tools:text="Status" />
@@ -269,6 +325,8 @@
                 android:id="@+id/text_view_homepage_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
                 android:text="@string/homepage"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_release_date" />
@@ -277,6 +335,7 @@
                 android:id="@+id/text_view_homepage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_homepage_text"
                 tools:text="Homepage" />
@@ -285,6 +344,8 @@
                 android:id="@+id/text_view_budget_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
                 android:text="@string/budget"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_homepage" />
@@ -293,6 +354,7 @@
                 android:id="@+id/text_view_budget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_budget_text"
                 tools:text="Budget" />
@@ -301,7 +363,9 @@
                 android:id="@+id/text_view_genres"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Genres"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/genres"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tab_layout" />
 
@@ -309,6 +373,7 @@
                 android:id="@+id/recycler_view_genres"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_genres" />
 
@@ -317,7 +382,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:constraint_referenced_ids="recycler_view_crew,recycler_view_cast" />
+                app:constraint_referenced_ids="recycler_view_crew,recycler_view_cast,text_view_cast,text_view_crew" />
 
             <androidx.constraintlayout.widget.Group
                 android:id="@+id/group_genre"
@@ -346,6 +411,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/recommended"
+                android:visibility="invisible"
+                android:textAllCaps="true"
+                android:layout_margin="10dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/barrier" />
 
@@ -356,6 +424,56 @@
                 android:visibility="invisible"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_recommended" />
+
+            <ImageView
+                android:id="@+id/image_view_star"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="@+id/text_view_tagline"
+                app:layout_constraintStart_toStartOf="@+id/image_view_poster"
+                app:layout_constraintTop_toTopOf="@+id/text_view_tagline"
+                app:srcCompat="@drawable/ic_baseline_star_24"
+                app:tint="#0fc556" />
+
+            <TextView
+                android:id="@+id/text_view_vote_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@+id/image_view_poster"
+                app:layout_constraintStart_toEndOf="@+id/image_view_star"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_rating"
+                tools:text="count" />
+
+            <TextView
+                android:id="@+id/text_view_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toTopOf="@id/button_retry"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="gone"
+                tools:text="An error occurred"
+                tools:visibility="visible" />
+
+            <Button
+                android:id="@+id/button_retry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:text="@string/retry"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,11 +1,7 @@
 package com.example.moviedb.features.home
 
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -87,11 +83,8 @@ class HomeFragment : Fragment(R.layout.fragment_home){
         binding.apply {
 
             toolbar.apply {
-                setNavigationOnClickListener { findNavController().navigateUp() }
                 title = "Home"
             }
-
-            requireActivity().window.statusBarColor = Color.parseColor("#445565")
 
             recyclerViewTopMovies.apply {
                 adapter = topMovieAdapter
@@ -130,21 +123,6 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                     viewModel.top20Movies.collect {
                         val result = it ?: return@collect
 
-                        swipeRefreshLayout.isRefreshing = result is Resource.Loading
-                        recyclerViewTopMovies.isVisible = !result.data.isNullOrEmpty()
-                        recyclerViewPopularMovies.isVisible = !result.data.isNullOrEmpty()
-                        recyclerViewTopTvShows.isVisible = !result.data.isNullOrEmpty()
-                        recyclerViewPopularTvShows.isVisible = !result.data.isNullOrEmpty()
-                        textViewError.isVisible =
-                            result.error != null && result.data.isNullOrEmpty()
-                        buttonRetry.isVisible =
-                            result.error != null && result.data.isNullOrEmpty()
-                        textViewError.text = getString(
-                            R.string.could_not_refresh,
-                            result.error?.localizedMessage
-                                ?: getString(R.string.unknown_error_occurred)
-                        )
-
                         topMovieAdapter.submitList(result.data) {
                             if (viewModel.top20MoviesPendingScrollToTopAfterRefresh) {
                                 recyclerViewTopMovies.scrollToPosition(0)
@@ -157,6 +135,8 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                 launch {
                     viewModel.popular20Movies.collect {
                         val result = it ?: return@collect
+
+
 
                         popularMovieAdapter.submitList(result.data) {
                             if (viewModel.popular20MoviesPendingScrollToTopAfterRefresh) {
@@ -171,6 +151,8 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                     viewModel.top20TvShows.collect {
                         val result = it ?: return@collect
 
+
+
                         topTvShowAdapter.submitList(result.data) {
                             if (viewModel.top20TvShowsPendingScrollToTopAfterRefresh) {
                                 recyclerViewTopTvShows.scrollToPosition(0)
@@ -183,6 +165,26 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                 launch {
                     viewModel.popular20TvShows.collect {
                         val result = it ?: return@collect
+                        swipeRefreshLayout.isRefreshing = result is Resource.Loading
+
+                        recyclerViewPopularTvShows.isVisible = !result.data.isNullOrEmpty()
+                        textViewPopularTvShows.isVisible = !result.data.isNullOrEmpty()
+                        recyclerViewTopTvShows.isVisible = !result.data.isNullOrEmpty()
+                        textViewTopTvShows.isVisible = !result.data.isNullOrEmpty()
+                        recyclerViewPopularMovies.isVisible = !result.data.isNullOrEmpty()
+                        textViewPopularMovies.isVisible = !result.data.isNullOrEmpty()
+                        recyclerViewTopMovies.isVisible = !result.data.isNullOrEmpty()
+                        textViewTopMovies.isVisible = !result.data.isNullOrEmpty()
+
+                        textViewError.isVisible =
+                            result.error != null && result.data.isNullOrEmpty()
+                        buttonRetry.isVisible =
+                            result.error != null && result.data.isNullOrEmpty()
+                        textViewError.text = getString(
+                            R.string.could_not_refresh,
+                            result.error?.localizedMessage
+                                ?: getString(R.string.unknown_error_occurred)
+                        )
 
                         popularTvShowAdapter.submitList(result.data) {
                             if (viewModel.popular20TvShowsPendingScrollToTopAfterRefresh) {
@@ -216,8 +218,7 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                         is HomeViewModel.Event.NavigateToMovieDetailsFragment -> {
                             val action =
                                 HomeFragmentDirections.actionHomeFragmentToMovieDetailsFragment(
-                                    event.movie,
-                                    event.movie.title
+                                    event.movie
                                 )
                             findNavController().navigate(action)
                         }

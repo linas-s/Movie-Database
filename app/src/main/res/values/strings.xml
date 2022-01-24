@@ -21,9 +21,16 @@
     <string name="details">DETAILS</string>
     <string name="genre">GENRE</string>
     <string name="reviews">Reviews</string>
-    <string name="status">Status</string>
-    <string name="release_date">Release date</string>
-    <string name="budget">Budget</string>
-    <string name="homepage">Homepage</string>
+    <string name="status">STATUS</string>
+    <string name="release_date">RELEASE DATE</string>
+    <string name="budget">BUDGET</string>
+    <string name="homepage">HOMEPAGE</string>
     <string name="recommended">Recommended</string>
+    <string name="cast">CAST</string>
+    <string name="crew">CREW</string>
+    <string name="top_rated_movies">TOP RATED MOVIES</string>
+    <string name="popular_movies">POPULAR MOVIES</string>
+    <string name="top_tv_shows">TOP TV SHOWS</string>
+    <string name="popular_tv_shows">POPULAR TV SHOWS</string>
+    <string name="genres">GENRES</string>
 </resources>

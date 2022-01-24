@@ -1,11 +1,16 @@
 package com.example.moviedb.features.details
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.moviedb.R
@@ -17,14 +22,11 @@ import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import android.animation.ObjectAnimator
-import android.animation.AnimatorSet
-import android.graphics.Color
-import android.os.Build
-import android.view.Window
-import android.view.WindowManager
-import androidx.navigation.fragment.findNavController
-import com.example.moviedb.MainActivity
+import androidx.core.graphics.ColorUtils
+import java.text.NumberFormat
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 
 
 @AndroidEntryPoint
@@ -124,6 +126,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                         textViewRating.isVisible = result is Resource.Success
                         textViewTrailer.isVisible = result is Resource.Success
                         textViewRecommended.isVisible = result is Resource.Success
+                        imageViewStar.isVisible = result is Resource.Success
 
                         Glide.with(imageViewBackdrop)
                             .load(result.data?.backdropUrl)
@@ -133,21 +136,31 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                             .load(result.data?.posterUrl)
                             .into(imageViewPoster)
 
+                        textViewError.isVisible = result.error != null
+                        buttonRetry.isVisible = result.error != null
+                        textViewError.text = getString(
+                            R.string.could_not_refresh,
+                            result.error?.localizedMessage
+                                ?: getString(R.string.unknown_error_occurred)
+                        )
+
                         textViewTitle.text = result.data?.title ?: ""
                         toolbar.title = result.data?.title ?: ""
+                        toolbar.setTitleTextColor(Color.TRANSPARENT)
                         textViewReleaseDateRuntime.text =
                             result.data?.releaseYear + " · " + result.data?.runtime + " mins"
 
                         textViewOverview.text = result.data?.overview ?: ""
                         if(textViewOverview.layout != null) {
-                            imageViewExpand.isVisible = textViewOverview.layout.getEllipsisCount(textViewOverview.lineCount - 1) > 0
+                            imageViewExpand.isVisible = textViewOverview.layout.getEllipsisCount(textViewOverview.lineCount - 1) > 0 && result is Resource.Success
                         }
 
                         textViewTagline.text = result.data?.tagline ?: ""
-                        textViewRating.text = result.data?.voteAverage.toString()
-                        textViewHomepage.text = result.data?.homepage ?: "No homepage available..."
+                        textViewRating.text = result.data?.voteAverage.toString() + "/10"
+                        textViewVoteCount.text = NumberFormat.getInstance().format(result.data?.voteCount).toString()
+                        textViewHomepage.text = if(result.data?.homepage.isNullOrEmpty()) "No homepage available..." else result.data?.homepage
                         textViewStatus.text = result.data?.status ?: "No status available..."
-                        textViewBudget.text = result.data?.budget.toString()
+                        textViewBudget.text = "$" + NumberFormat.getInstance().format(result.data?.budget ?: 0).toString()
                         textViewReleaseDate.text =
                             result.data?.releaseDate ?: "Unknown release date..."
 
@@ -158,6 +171,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                     viewModel.movieCast.collect {
                         val result = it ?: return@collect
 
+                        textViewCast.isVisible = result is Resource.Success
                         recyclerViewCast.isVisible = result is Resource.Success
 
                         castAdapter.submitList(result.data)
@@ -168,6 +182,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                     viewModel.movieCrew.collect {
                         val result = it ?: return@collect
 
+                        textViewCrew.isVisible = result is Resource.Success
                         recyclerViewCrew.isVisible = result is Resource.Success
 
                         val movieDirectors = result.data?.filter { person ->
@@ -185,7 +200,6 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                 launch {
                     viewModel.movieGenres.collect {
                         val result = it ?: return@collect
-
                         genreAdapter.submitList(result.data)
                     }
                 }
@@ -199,14 +213,33 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                         recommendationAdapter.submitList(result.data)
                     }
                 }
+
+                launch {
+                    viewModel.movieVideo.collect {
+                        val result = it ?: return@collect
+
+                        textViewTrailer.setOnClickListener {
+                            val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:${result.data?.key}"))
+                            val webIntent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("http://www.youtube.com/watch?v=${result.data?.key}")
+                            )
+                            try {
+                                context!!.startActivity(appIntent)
+                            } catch (ex: ActivityNotFoundException) {
+                                context!!.startActivity(webIntent)
+                            }
+                        }
+                    }
+                }
             }
 
             viewOverviewContainer.setOnClickListener {
                 when(textViewOverview.lineCount) {
                     3 -> {
                         val animatorSet = AnimatorSet()
-                        val textViewObjectAnimator = ObjectAnimator.ofInt(textViewOverview, "maxLines", 25)
-                        textViewObjectAnimator.duration = 200
+                        val textViewObjectAnimator = ObjectAnimator.ofInt(textViewOverview, "maxLines", 10)
+                        textViewObjectAnimator.duration = 100 * textViewOverview.lineCount.toLong()
                         val imageViewObjectAnimator = ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 1f, 0f)
                         imageViewObjectAnimator.duration = 300
                         animatorSet.playTogether(textViewObjectAnimator, imageViewObjectAnimator)
@@ -216,7 +249,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                     else -> {
                         val animatorSet = AnimatorSet()
                         val textViewObjectAnimator = ObjectAnimator.ofInt(textViewOverview, "maxLines", 3)
-                        textViewObjectAnimator.duration = 200
+                        textViewObjectAnimator.duration = 300
                         val imageViewObjectAnimator = ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 0f, 1f)
                         imageViewObjectAnimator.duration = 300
                         animatorSet.playTogether(textViewObjectAnimator, imageViewObjectAnimator)
@@ -249,13 +282,35 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                 }
 
                 override fun onTabUnselected(tab: TabLayout.Tab?) {
-                    true
+
                 }
 
                 override fun onTabReselected(tab: TabLayout.Tab?) {
-                    true
+
                 }
             })
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+                    when {
+                        scrollY < 460 -> {
+                            requireActivity().window.statusBarColor = Color.TRANSPARENT
+                            toolbar.setBackgroundColor(Color.TRANSPARENT)
+                            toolbar.setTitleTextColor(Color.TRANSPARENT)
+                        }
+                        scrollY < 545 -> {
+                            requireActivity().window.statusBarColor = ColorUtils.setAlphaComponent(Color.parseColor("#181b20"), ((scrollY-460)*3))
+                            toolbar.setBackgroundColor(ColorUtils.setAlphaComponent(Color.parseColor("#445565"), ((scrollY-460)*3)))
+                            toolbar.setTitleTextColor(ColorUtils.setAlphaComponent(Color.WHITE, (((scrollY-460)*3))))
+                        }
+                        else -> {
+                            requireActivity().window.statusBarColor = Color.parseColor("#181b20")
+                            toolbar.setBackgroundColor(Color.parseColor("#445565"))
+                            toolbar.setTitleTextColor(Color.WHITE)
+                        }
+                    }
+                }
+            }
         }
     }
 

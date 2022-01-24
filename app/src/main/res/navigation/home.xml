@@ -19,8 +19,5 @@
         <argument
             android:name="movie"
             app:argType="com.example.moviedb.data.Movie" />
-        <argument
-            android:name="title"
-            app:argType="string" />
     </fragment>
 </navigation>

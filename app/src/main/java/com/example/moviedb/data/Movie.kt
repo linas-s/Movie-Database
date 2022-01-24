@@ -5,6 +5,7 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
+import java.text.DecimalFormat
 
 @Entity(tableName = "movie")
 @Parcelize
@@ -63,6 +64,7 @@ data class ListItem(
     val mediaType: String
 ) {
     val posterUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
+    val voteAverageRounded: String get() = DecimalFormat("#.#").format(voteAverage)
 }
 
 @Entity(tableName = "person")

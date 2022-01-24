@@ -2,8 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_marginStart="10dp"
+    android:layout_marginTop="10dp"
+    android:layout_width="100dp"
+    android:layout_height="180dp">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view"
@@ -23,11 +25,11 @@
 
         <TextView
             android:id="@+id/text_view_placeholder"
-            tools:text="Placeholder name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
             android:visibility="invisible"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            tools:text="Placeholder name" />
 
     </androidx.cardview.widget.CardView>
 
@@ -36,6 +38,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
+        android:textSize="12sp"
+        android:maxLines="3"
+        android:ellipsize="end"
         app:layout_constraintEnd_toEndOf="@+id/card_view"
         app:layout_constraintStart_toStartOf="@+id/card_view"
         app:layout_constraintTop_toBottomOf="@+id/card_view"
@@ -45,11 +50,15 @@
         android:id="@+id/text_view_job_character"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="Job/Character"
+        android:fontFamily="@font/graphik_bold"
         android:gravity="center_horizontal"
+        android:textSize="12sp"
+        android:maxLines="3"
+        android:ellipsize="end"
         app:layout_constraintEnd_toEndOf="@+id/card_view"
         app:layout_constraintStart_toStartOf="@+id/card_view"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_name" />
+        app:layout_constraintTop_toBottomOf="@+id/text_view_name"
+        tools:text="Job/Character" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,7 +19,7 @@ class ListItemViewHolder(
                 .into(imageViewPoster)
 
             textViewTitle.text = listItem.title
-            textViewRating.text = listItem.voteAverage.toString()
+            textViewRating.text = listItem.voteAverageRounded
 
             imageViewWatchlist.setImageResource(
                 when{

@@ -1,12 +1,7 @@
 package com.example.moviedb.features.watchlist
 
-import android.graphics.Color
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -14,12 +9,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.moviedb.MainActivity
 import com.example.moviedb.R
-import com.example.moviedb.databinding.FragmentHomeBinding
 import com.example.moviedb.databinding.FragmentWatchlistBinding
-import com.example.moviedb.features.search.SearchFragmentDirections
-import com.example.moviedb.features.search.SearchViewModel
 import com.example.moviedb.shared.ListItemAdapter
 import com.example.moviedb.util.exhaustive
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,7 +44,6 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {
         binding.apply {
 
             toolbar.apply {
-                setNavigationOnClickListener { findNavController().navigateUp() }
                 title = "Watchlist"
                 inflateMenu(R.menu.menu_watchlist)
                 setOnMenuItemClickListener { item ->
@@ -67,7 +57,7 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {
                 }
             }
 
-            requireActivity().window.statusBarColor = Color.parseColor("#445565")
+            //requireActivity().window.statusBarColor = Color.parseColor("#445565")
 
             recyclerViewWatchlist.apply {
                 adapter = watchlistAdapter
@@ -91,8 +81,7 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {
                         is WatchlistViewModel.Event.NavigateToMovieDetailsFragment -> {
                             val action =
                                 WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(
-                                    event.movie,
-                                    event.movie.title
+                                    event.movie
                                 )
                             findNavController().navigate(action)
                         }

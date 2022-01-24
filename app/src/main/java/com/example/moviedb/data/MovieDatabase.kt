@@ -11,7 +11,8 @@ import androidx.room.RoomDatabase
         SearchQueryRemoteKey::class,
         Credits::class,
         MediaGenre::class,
-        MediaRecommendation::class
+        MediaRecommendation::class,
+        MediaVideo::class
     ],
     version = 1
 )

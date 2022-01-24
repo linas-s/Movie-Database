@@ -1,10 +1,7 @@
 package com.example.moviedb.features.search
 
-import android.graphics.Color
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.View
+import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -13,16 +10,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.moviedb.MainActivity
 import com.example.moviedb.R
 import com.example.moviedb.databinding.FragmentSearchBinding
-import com.example.moviedb.features.home.HomeFragmentDirections
-import com.example.moviedb.features.home.HomeViewModel
 import com.example.moviedb.util.exhaustive
 import com.example.moviedb.util.showSnackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
 
 @AndroidEntryPoint
 class SearchFragment : Fragment(R.layout.fragment_search){
@@ -32,12 +28,14 @@ class SearchFragment : Fragment(R.layout.fragment_search){
     private var currentBinding: FragmentSearchBinding? = null
     private val binding get() = currentBinding!!
 
+    private lateinit var searchListItemAdapter: SearchListItemPagingAdapter
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         currentBinding = FragmentSearchBinding.bind(view)
 
-        val searchListItemAdapter = SearchListItemPagingAdapter(
+        searchListItemAdapter = SearchListItemPagingAdapter(
             onItemClick = { media ->
                 viewModel.onSearchItemClick(media)
             },
@@ -47,33 +45,6 @@ class SearchFragment : Fragment(R.layout.fragment_search){
         )
 
         binding.apply {
-
-            toolbar.apply {
-                setNavigationOnClickListener { findNavController().navigateUp() }
-                title = "Search"
-                inflateMenu(R.menu.menu_search_media)
-                val searchItem = menu.findItem(R.id.action_search)
-                val searchView = searchItem?.actionView as SearchView
-
-                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                    override fun onQueryTextSubmit(query: String?): Boolean {
-                        if (!query.isNullOrBlank()) {
-                            viewModel.onSearchQuerySubmit(query)
-                            searchView.clearFocus()
-                        }
-                        return true
-                    }
-
-                    override fun onQueryTextChange(query: String?): Boolean {
-                        if (!query.isNullOrBlank()) {
-                            viewModel.onSearchQuerySubmit(query)
-                        }
-                        return true
-                    }
-                })
-            }
-
-            requireActivity().window.statusBarColor = Color.parseColor("#445565")
 
             recyclerViewSearch.apply {
                 adapter = searchListItemAdapter.withLoadStateFooter(
@@ -90,9 +61,36 @@ class SearchFragment : Fragment(R.layout.fragment_search){
                 }
             }
 
-            swipeRefreshLayout.isEnabled = false
+            //swipeRefreshLayout.isEnabled = false
 
-            textViewInstructions.isVisible = true
+            //textViewInstructions.isVisible = true
+
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.hasCurrentQuery.collect { hasCurrentQuery ->
+                    textViewInstructions.isVisible = !hasCurrentQuery
+                    swipeRefreshLayout.isEnabled = hasCurrentQuery
+
+                    if (!hasCurrentQuery) {
+                        recyclerViewSearch.isVisible = false
+                    }
+                }
+            }
+
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                searchListItemAdapter.loadStateFlow
+                    .distinctUntilChangedBy { it.source.refresh }
+                    .filter { it.source.refresh is LoadState.NotLoading }
+                    .collect {
+                        if (viewModel.pendingScrollToTopAfterNewQuery) {
+                            recyclerViewSearch.scrollToPosition(0)
+                            viewModel.pendingScrollToTopAfterNewQuery = false
+                        }
+                        if (viewModel.pendingScrollToTopAfterRefresh && it.mediator?.refresh is LoadState.NotLoading) {
+                            recyclerViewSearch.scrollToPosition(0)
+                            viewModel.pendingScrollToTopAfterRefresh = false
+                        }
+                    }
+            }
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 searchListItemAdapter.loadStateFlow
@@ -103,17 +101,20 @@ class SearchFragment : Fragment(R.layout.fragment_search){
                                 buttonRetry.isVisible = false
                                 swipeRefreshLayout.isRefreshing = true
                                 textViewNoResults.isVisible = false
-                                recyclerViewSearch.isVisible = searchListItemAdapter.itemCount > 0
-                                textViewInstructions.isVisible = false
+
+                                recyclerViewSearch.isVisible = !viewModel.newQueryInProgress && searchListItemAdapter.itemCount > 0
+
+                                //textViewInstructions.isVisible = false
 
                                 viewModel.refreshInProgress = true
+                                viewModel.pendingScrollToTopAfterRefresh = true
                             }
                             is LoadState.NotLoading -> {
                                 textViewError.isVisible = false
                                 buttonRetry.isVisible = false
                                 swipeRefreshLayout.isRefreshing = false
                                 recyclerViewSearch.isVisible = searchListItemAdapter.itemCount > 0
-                                textViewInstructions.isVisible = false
+                                //textViewInstructions.isVisible = false
 
                                 val noResults =
                                     searchListItemAdapter.itemCount < 1 && loadState.append.endOfPaginationReached
@@ -122,11 +123,12 @@ class SearchFragment : Fragment(R.layout.fragment_search){
                                 textViewNoResults.isVisible = noResults
 
                                 viewModel.refreshInProgress = false
+                                viewModel.newQueryInProgress
                             }
                             is LoadState.Error -> {
                                 swipeRefreshLayout.isRefreshing = false
                                 textViewNoResults.isVisible = false
-                                textViewInstructions.isVisible = false
+                                //textViewInstructions.isVisible = false
                                 recyclerViewSearch.isVisible = searchListItemAdapter.itemCount > 0
 
                                 val noCachedResults =
@@ -146,6 +148,8 @@ class SearchFragment : Fragment(R.layout.fragment_search){
                                     showSnackbar(errorMessage)
                                 }
                                 viewModel.refreshInProgress = false
+                                viewModel.newQueryInProgress = false
+                                viewModel.pendingScrollToTopAfterRefresh = false
                             }
                         }
                     }
@@ -165,14 +169,34 @@ class SearchFragment : Fragment(R.layout.fragment_search){
                         is SearchViewModel.Event.NavigateToMovieDetailsFragment -> {
                             val action =
                                 SearchFragmentDirections.actionSearchFragmentToMovieDetailsFragment(
-                                    event.movie,
-                                    event.movie.title
+                                    event.movie
                                 )
                             findNavController().navigate(action)
                         }
                         is SearchViewModel.Event.NavigateToTvShowDetailsFragment -> TODO()
                     }.exhaustive
                 }
+            }
+
+            toolbar.apply {
+                title = "Search"
+                inflateMenu(R.menu.menu_search_media)
+                val searchItem = menu.findItem(R.id.action_search)
+                val searchView = searchItem?.actionView as SearchView
+
+                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        if (!query.isNullOrBlank()) {
+                            viewModel.onSearchQuerySubmit(query)
+                            searchView.clearFocus()
+                        }
+                        return true
+                    }
+
+                    override fun onQueryTextChange(query: String?): Boolean {
+                        return true
+                    }
+                })
             }
         }
     }

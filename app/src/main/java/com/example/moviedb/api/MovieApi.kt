@@ -61,4 +61,10 @@ interface MovieApi {
         @Query("api_key") apiKey: String = API_KEY,
         @Query("page") page: Int
     ): MovieListResponse
+
+    @GET("movie/{id}/videos")
+    suspend fun getMovieVideos(
+        @Path("id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY
+    ): MovieVideoResponse
 }

@@ -16,13 +16,13 @@ interface MovieDao {
     @Query("SELECT * FROM movie WHERE id = :id")
     fun getMovieFlow(id: Int): Flow<Movie>
 
-    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie ORDER BY voteAverage DESC LIMIT 20")
+    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE voteCount > 5000 ORDER BY voteAverage DESC, popularity DESC LIMIT 20")
     fun getTop20Movies(): Flow<List<ListItem>>
 
     @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie ORDER BY popularity DESC LIMIT 20")
     fun getPopular20Movies(): Flow<List<ListItem>>
 
-    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show ORDER BY voteAverage DESC LIMIT 20")
+    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show WHERE voteCount > 1000 ORDER BY voteAverage DESC, popularity DESC LIMIT 20")
     fun getTop20TvShows(): Flow<List<ListItem>>
 
     @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show ORDER BY popularity DESC LIMIT 20")
@@ -70,6 +70,9 @@ interface MovieDao {
     @Query("SELECT * FROM media_genre WHERE id = :movieId AND mediaType = 'movie'")
     fun getMovieGenres(movieId: Int): Flow<List<MediaGenre>>
 
+    @Query("SELECT * FROM media_video WHERE id = :movieId AND mediaType = 'movie'")
+    fun getMovieVideo(movieId: Int): Flow<MediaVideo>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovie(movie: Movie)
 
@@ -93,6 +96,9 @@ interface MovieDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMediaGenres(mediaGenres: List<MediaGenre>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMediaVideo(mediaVideo: MediaVideo)
 
     @Update
     suspend fun updateMovie(movie: Movie)

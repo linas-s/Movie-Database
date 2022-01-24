@@ -6,10 +6,8 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.example.moviedb.data.Movie
 import com.example.moviedb.data.MovieRepository
-import com.example.moviedb.features.home.HomeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,5 +36,9 @@ class MovieDetailsViewModel @Inject constructor(
 
     val movieRecommendations = receivedMovie.flatMapLatest { movie ->
         repository.getMovieRecommendations(movie)
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    val movieVideo = receivedMovie.flatMapLatest { movie ->
+        repository.getMovieVideo(movie)
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 }

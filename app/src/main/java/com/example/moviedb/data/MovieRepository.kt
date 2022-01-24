@@ -30,8 +30,9 @@ class MovieRepository @Inject constructor(
                 movieDao.getTop20Movies()
             },
             fetch = {
-                val response = movieApi.getTopMovies(page = 1)
-                response.results
+                val response =
+                    movieApi.getTopMovies(page = 1).results + movieApi.getTopMovies(page = 2).results
+                response
             },
             saveFetchResult = { serverMovies ->
                 val watchList = movieDao.getAllWatchlistMovies().first()
@@ -162,8 +163,9 @@ class MovieRepository @Inject constructor(
                 movieDao.getTop20TvShows()
             },
             fetch = {
-                val response = movieApi.getTopTvShows(page = 1)
-                response.results
+                val response =
+                    movieApi.getTopTvShows(page = 1).results + movieApi.getTopTvShows(page = 2).results
+                response
             },
             saveFetchResult = { serverTvShows ->
                 val watchList = movieDao.getAllWatchlistTvShows().first()
@@ -481,6 +483,39 @@ class MovieRepository @Inject constructor(
             },
             fetch = { },
             saveFetchResult = { }
+        )
+
+    fun getMovieVideo(
+        movie: Movie
+    ): Flow<Resource<MediaVideo>> =
+        networkBoundResource(
+            query = {
+                movieDao.getMovieVideo(movie.id)
+            },
+            fetch = {
+                val response = movieApi.getMovieVideos(movie.id)
+                val filtered = response.results.filter { serverMovies ->
+                    serverMovies.site == "YouTube" &&
+                    serverMovies.type == "Trailer"
+                }
+                filtered
+            },
+            saveFetchResult = { serverVideo ->
+                val videos = serverVideo.map { serverVideo ->
+                        MediaVideo(
+                            mediaType = "movie",
+                            id = movie.id,
+                            key = serverVideo.key,
+                            publishedAt = serverVideo.published_at
+                        )
+                    }
+                val latestMovieVideo = videos.sortedBy {
+                    it.publishedAt
+                }.last()
+                movieDb.withTransaction {
+                    movieDao.insertMediaVideo(latestMovieVideo)
+                }
+            }
         )
 
     fun getSearchResultsPaged(
