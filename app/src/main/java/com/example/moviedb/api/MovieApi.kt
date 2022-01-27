@@ -98,4 +98,10 @@ interface MovieApi {
         @Path("person_id") id: Int,
         @Query("api_key") apiKey: String = API_KEY
     ): PersonDetailsDto
+
+    @GET("person/{person_id}/combined_credits")
+    suspend fun getPersonMedia(
+        @Path("person_id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY
+    ): PersonMediaResponse
 }

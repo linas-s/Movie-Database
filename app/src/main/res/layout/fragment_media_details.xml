@@ -328,15 +328,6 @@
                 app:layout_constraintTop_toBottomOf="@id/text_view_release_date" />
 
             <TextView
-                android:id="@+id/text_view_homepage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/text_view_homepage_text"
-                tools:text="Homepage" />
-
-            <TextView
                 android:id="@+id/text_view_budget_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -344,7 +335,7 @@
                 android:layout_marginStart="10dp"
                 android:text="@string/budget"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/text_view_homepage" />
+                app:layout_constraintTop_toBottomOf="@id/text_view_homepage_text" />
 
             <TextView
                 android:id="@+id/text_view_budget"
@@ -392,7 +383,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:constraint_referenced_ids="text_view_homepage,text_view_budget,text_view_status,text_view_release_date,text_view_budget_text,text_view_homepage_text,text_view_release_date_text,text_view_status_text" />
+                app:constraint_referenced_ids="text_view_budget,text_view_status,text_view_release_date,text_view_budget_text,text_view_homepage_text,text_view_release_date_text,text_view_status_text" />
 
 
             <androidx.constraintlayout.widget.Barrier
@@ -400,7 +391,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="recycler_view_crew,recycler_view_genres, text_view_budget, text_view_homepage" />
+                app:constraint_referenced_ids="recycler_view_crew,recycler_view_genres, text_view_budget, text_view_homepage_text" />
 
             <TextView
                 android:id="@+id/text_view_recommended"

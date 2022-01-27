@@ -31,6 +31,8 @@ import com.example.moviedb.databinding.FragmentMediaDetailsBinding
 import com.example.moviedb.features.watchlist.WatchlistFragmentDirections
 import com.example.moviedb.features.watchlist.WatchlistViewModel
 import com.example.moviedb.util.exhaustive
+import com.example.moviedb.util.showSnackbar
+import com.google.android.material.snackbar.Snackbar
 
 
 @AndroidEntryPoint
@@ -78,7 +80,8 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
             appBarLayout.bringToFront()
 
             requireActivity().window.statusBarColor = Color.TRANSPARENT
-            requireActivity().window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            requireActivity().window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 
             recyclerViewCast.apply {
                 adapter = castAdapter
@@ -150,15 +153,16 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
 
                         textViewTitle.text = result.data?.title ?: ""
                         toolbar.title = result.data?.title ?: ""
-                        if(scrollView.scrollY == 0)toolbar.setTitleTextColor(Color.TRANSPARENT)
+                        if (scrollView.scrollY == 0) toolbar.setTitleTextColor(Color.TRANSPARENT)
 
 
                         textViewOverview.text = result.data?.overview ?: ""
-                        if(textViewOverview.layout != null && !imageViewExpand.isVisible) {
-                            imageViewExpand.isVisible = textViewOverview.layout.getEllipsisCount(textViewOverview.lineCount - 1) > 0 && result is Resource.Success
+                        if (textViewOverview.layout != null && !imageViewExpand.isVisible) {
+                            imageViewExpand.isVisible =
+                                textViewOverview.layout.getEllipsisCount(textViewOverview.lineCount - 1) > 0 && result is Resource.Success
                         }
 
-                        if(result.data?.mediaType == "movie") {
+                        if (result.data?.mediaType == "movie") {
                             textViewDirectedCreatedBy.text = "DIRECTED BY"
                             textViewReleaseDateRuntime.text =
                                 result.data?.releaseYear + " · " + result.data?.runtime + " mins"
@@ -170,13 +174,22 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
 
                         textViewTagline.text = result.data?.tagline ?: ""
                         textViewRating.text = result.data?.voteAverage.toString() + "/10"
-                        textViewVoteCount.text = NumberFormat.getInstance().format(result.data?.voteCount).toString()
-                        textViewHomepage.text = if(result.data?.homepage.isNullOrEmpty()) "No homepage available..." else result.data?.homepage
+                        textViewVoteCount.text =
+                            NumberFormat.getInstance().format(result.data?.voteCount).toString()
                         textViewStatus.text = result.data?.status ?: "No status available..."
                         textViewBudget.text = result.data?.budgetText
                         textViewReleaseDate.text =
                             result.data?.releaseDate ?: "Unknown release date..."
 
+                        textViewHomepageText.setOnClickListener {
+                            if (!result.data?.homepage.isNullOrBlank()) {
+                                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(result.data?.homepage))
+                                startActivity(webIntent)
+                            }
+                            else {
+                                showSnackbar(getString(R.string.no_homepage_available), duration = Snackbar.LENGTH_SHORT)
+                            }
+                        }
                     }
                 }
 
@@ -232,7 +245,10 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                         val result = it ?: return@collect
 
                         textViewTrailer.setOnClickListener {
-                            val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:${result.data?.key}"))
+                            val appIntent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("vnd.youtube:${result.data?.key}")
+                            )
                             val webIntent = Intent(
                                 Intent.ACTION_VIEW,
                                 Uri.parse("http://www.youtube.com/watch?v=${result.data?.key}")
@@ -248,12 +264,14 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
             }
 
             viewOverviewContainer.setOnClickListener {
-                when(textViewOverview.lineCount) {
+                when (textViewOverview.lineCount) {
                     3 -> {
                         val animatorSet = AnimatorSet()
-                        val textViewObjectAnimator = ObjectAnimator.ofInt(textViewOverview, "maxLines", 25)
+                        val textViewObjectAnimator =
+                            ObjectAnimator.ofInt(textViewOverview, "maxLines", 25)
                         textViewObjectAnimator.duration = 100 * textViewOverview.lineCount.toLong()
-                        val imageViewObjectAnimator = ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 1f, 0f)
+                        val imageViewObjectAnimator =
+                            ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 1f, 0f)
                         imageViewObjectAnimator.duration = 300
                         animatorSet.playTogether(textViewObjectAnimator, imageViewObjectAnimator)
 
@@ -261,9 +279,11 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                     }
                     else -> {
                         val animatorSet = AnimatorSet()
-                        val textViewObjectAnimator = ObjectAnimator.ofInt(textViewOverview, "maxLines", 3)
+                        val textViewObjectAnimator =
+                            ObjectAnimator.ofInt(textViewOverview, "maxLines", 3)
                         textViewObjectAnimator.duration = 300
-                        val imageViewObjectAnimator = ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 0f, 1f)
+                        val imageViewObjectAnimator =
+                            ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 0f, 1f)
                         imageViewObjectAnimator.duration = 300
                         animatorSet.playTogether(textViewObjectAnimator, imageViewObjectAnimator)
 
@@ -313,9 +333,23 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                             toolbar.setTitleTextColor(Color.TRANSPARENT)
                         }
                         scrollY < 545 -> {
-                            requireActivity().window.statusBarColor = ColorUtils.setAlphaComponent(Color.parseColor("#181b20"), ((scrollY-460)*3))
-                            toolbar.setBackgroundColor(ColorUtils.setAlphaComponent(Color.parseColor("#445565"), ((scrollY-460)*3)))
-                            toolbar.setTitleTextColor(ColorUtils.setAlphaComponent(Color.WHITE, (((scrollY-460)*3))))
+                            requireActivity().window.statusBarColor = ColorUtils.setAlphaComponent(
+                                Color.parseColor("#181b20"),
+                                ((scrollY - 460) * 3)
+                            )
+                            toolbar.setBackgroundColor(
+                                ColorUtils.setAlphaComponent(
+                                    Color.parseColor(
+                                        "#445565"
+                                    ), ((scrollY - 460) * 3)
+                                )
+                            )
+                            toolbar.setTitleTextColor(
+                                ColorUtils.setAlphaComponent(
+                                    Color.WHITE,
+                                    (((scrollY - 460) * 3))
+                                )
+                            )
                         }
                         else -> {
                             requireActivity().window.statusBarColor = Color.parseColor("#181b20")

@@ -723,6 +723,180 @@ class MovieRepository @Inject constructor(
             }
         )
 
+    fun getPersonMediaCast(
+        personId: Int
+    ): Flow<Resource<List<ListItem>>> =
+        networkBoundResource(
+            query = {
+                val personMoviesCast = movieDao.getPersonMediaCast(personId)
+                personMoviesCast
+            },
+            fetch = {
+                val response = movieApi.getPersonMedia(personId)
+                response.cast
+            },
+            saveFetchResult = { serverMedia ->
+
+                val movieWatchList = movieDao.getAllWatchlistMovies().first()
+
+                val movies = serverMedia.filter { serverMedia ->
+                    serverMedia.media_type == "movie"
+                }.map { serverMedia ->
+                    val isWatchlist = movieWatchList.any { watchListMovie ->
+                        watchListMovie.id == serverMedia.id
+                    }
+                    Movie(
+                        id = serverMedia.id,
+                        title = serverMedia.title ?: "",
+                        releaseDate = serverMedia.release_date ?: "",
+                        popularity = serverMedia.popularity,
+                        voteAverage = serverMedia.vote_average,
+                        voteCount = serverMedia.vote_count,
+                        overview = serverMedia.overview,
+                        status = null,
+                        budget = null,
+                        tagline = null,
+                        backdropPath = serverMedia.backdrop_path,
+                        posterPath = serverMedia.poster_path,
+                        homepage = null,
+                        runtime = 0,
+                        isWatchlist = isWatchlist
+                    )
+                }
+
+                val tvShowWatchList = movieDao.getAllWatchlistTvShows().first()
+
+                val tvShows = serverMedia.filter { serverMedia ->
+                    serverMedia.media_type == "tv"
+                }.map { serverMedia ->
+                    val isWatchlist = tvShowWatchList.any { watchListTvShow ->
+                        watchListTvShow.id == serverMedia.id
+                    }
+                    TvShow(
+                        id = serverMedia.id,
+                        title = serverMedia.name ?: "",
+                        releaseDate = serverMedia.first_air_date ?: "",
+                        popularity = serverMedia.popularity,
+                        voteAverage = serverMedia.vote_average,
+                        voteCount = serverMedia.vote_count,
+                        overview = serverMedia.overview,
+                        lastAirDate = null,
+                        numberOfSeasons = null,
+                        status = null,
+                        tagline = null,
+                        backdropPath = serverMedia.backdrop_path,
+                        posterPath = serverMedia.poster_path,
+                        homepage = null,
+                        isWatchlist = isWatchlist
+                    )
+                }
+
+                val credits =
+                    serverMedia.map { serverCast ->
+                        Credits(
+                            mediaType = serverCast.media_type,
+                            mediaId = serverCast.id,
+                            personId = personId,
+                            character = serverCast.character,
+                            job = "acting",
+                            listOrder = 0
+                        )
+                    }
+                movieDb.withTransaction {
+                    movieDao.insertMovies(movies)
+                    movieDao.insertTvShows(tvShows)
+                    movieDao.insertCredits(credits)
+                }
+            }
+        )
+
+    fun getPersonMediaCrew(
+        personId: Int
+    ): Flow<Resource<List<ListItem>>> =
+        networkBoundResource(
+            query = {
+                val personMoviesCrew = movieDao.getPersonMediaCrew(personId)
+                personMoviesCrew
+            },
+            fetch = {
+                val response = movieApi.getPersonMedia(personId)
+                response.crew
+            },
+            saveFetchResult = { serverMedia ->
+
+                val movieWatchList = movieDao.getAllWatchlistMovies().first()
+
+                val movies = serverMedia.filter { serverMedia ->
+                    serverMedia.media_type == "movie"
+                }.map { serverMedia ->
+                    val isWatchlist = movieWatchList.any { watchListMovie ->
+                        watchListMovie.id == serverMedia.id
+                    }
+                    Movie(
+                        id = serverMedia.id,
+                        title = serverMedia.title ?: "",
+                        releaseDate = serverMedia.release_date ?: "",
+                        popularity = serverMedia.popularity,
+                        voteAverage = serverMedia.vote_average,
+                        voteCount = serverMedia.vote_count,
+                        overview = serverMedia.overview,
+                        status = null,
+                        budget = null,
+                        tagline = null,
+                        backdropPath = serverMedia.backdrop_path,
+                        posterPath = serverMedia.poster_path,
+                        homepage = null,
+                        runtime = 0,
+                        isWatchlist = isWatchlist
+                    )
+                }
+
+                val tvShowWatchList = movieDao.getAllWatchlistTvShows().first()
+
+                val tvShows = serverMedia.filter { serverMedia ->
+                    serverMedia.media_type == "tv"
+                }.map { serverMedia ->
+                    val isWatchlist = tvShowWatchList.any { watchListTvShow ->
+                        watchListTvShow.id == serverMedia.id
+                    }
+                    TvShow(
+                        id = serverMedia.id,
+                        title = serverMedia.name ?: "",
+                        releaseDate = serverMedia.first_air_date ?: "",
+                        popularity = serverMedia.popularity,
+                        voteAverage = serverMedia.vote_average,
+                        voteCount = serverMedia.vote_count,
+                        overview = serverMedia.overview,
+                        lastAirDate = null,
+                        numberOfSeasons = null,
+                        status = null,
+                        tagline = null,
+                        backdropPath = serverMedia.backdrop_path,
+                        posterPath = serverMedia.poster_path,
+                        homepage = null,
+                        isWatchlist = isWatchlist
+                    )
+                }
+
+                val credits =
+                    serverMedia.map { serverCrew ->
+                        Credits(
+                            mediaType = serverCrew.media_type,
+                            mediaId = serverCrew.id,
+                            personId = personId,
+                            character = null,
+                            job = "crew",
+                            listOrder = 0
+                        )
+                    }
+                movieDb.withTransaction {
+                    movieDao.insertMovies(movies)
+                    movieDao.insertTvShows(tvShows)
+                    movieDao.insertCredits(credits)
+                }
+            }
+        )
+
     fun getSearchResultsPaged(
         query: String,
         refreshOnInit: Boolean

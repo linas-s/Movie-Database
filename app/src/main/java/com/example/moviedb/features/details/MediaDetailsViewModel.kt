@@ -19,7 +19,7 @@ class MediaDetailsViewModel @Inject constructor(
     state: SavedStateHandle
 ) : ViewModel() {
 
-    private val eventChannel = Channel<MediaDetailsViewModel.Event>()
+    private val eventChannel = Channel<Event>()
     val events = eventChannel.receiveAsFlow()
 
     private val receivedMedia = state.getLiveData<ListItem>("listItem").asFlow()

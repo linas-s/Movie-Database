@@ -92,6 +92,7 @@ data class ListItem(
     val posterPath: String?,
     val voteAverage: Double,
     val isWatchlist: Boolean,
+    val popularity: Double,
     val updatedAt: Long,
     val mediaType: String
 ) : Parcelable {
@@ -133,7 +134,7 @@ data class SearchListItem(
     val posterUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
 }
 
-@Entity(tableName = "credits", primaryKeys = ["mediaType", "personId", "job"])
+@Entity(tableName = "credits", primaryKeys = ["mediaType", "mediaId", "personId", "job"])
 data class Credits(
     val mediaType: String,
     val mediaId: Int,

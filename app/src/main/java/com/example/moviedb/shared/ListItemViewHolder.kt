@@ -16,6 +16,7 @@ class ListItemViewHolder(
         binding.apply {
             Glide.with(itemView)
                 .load(listItem.posterUrl)
+                .error(R.drawable.ic_baseline_broken_image_24)
                 .into(imageViewPoster)
 
             textViewTitle.text = listItem.title

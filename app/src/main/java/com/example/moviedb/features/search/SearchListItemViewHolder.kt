@@ -16,6 +16,7 @@ class SearchListItemViewHolder(
         binding.apply {
             Glide.with(itemView)
                 .load(searchListItem.posterUrl)
+                .error(R.drawable.ic_baseline_broken_image_24)
                 .into(imageViewPoster)
 
             textViewTitle.text = searchListItem.title

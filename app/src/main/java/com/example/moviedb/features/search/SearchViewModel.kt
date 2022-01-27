@@ -82,7 +82,8 @@ class SearchViewModel @Inject constructor(
                         posterPath = searchListItem.posterPath,
                         voteAverage = 0.0,
                         isWatchlist = false,
-                        updatedAt = 0
+                        updatedAt = 0,
+                        popularity = 0.0
                     )
                     onMediaSelected(listItem)
                 }

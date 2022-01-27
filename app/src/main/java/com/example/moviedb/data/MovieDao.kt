@@ -22,27 +22,27 @@ interface MovieDao {
     @Query("SELECT id, title, tagline, releaseDate, popularity, voteCount, voteAverage, overview, backdropPath, posterPath, homepage, status, budget, runtime, null as numberOfSeasons, null as lastAirDate, 'movie' as mediaType FROM movie WHERE id = :id")
     fun getMovieFlow(id: Int): Flow<MediaDetails>
 
-    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE voteCount > 5000 ORDER BY voteAverage DESC, popularity DESC LIMIT 20")
+    @Query("SELECT id, title, releaseDate, popularity, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE voteCount > 5000 ORDER BY voteAverage DESC, popularity DESC LIMIT 20")
     fun getTop20Movies(): Flow<List<ListItem>>
 
-    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie ORDER BY popularity DESC LIMIT 20")
+    @Query("SELECT id, title, releaseDate, popularity, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie ORDER BY popularity DESC LIMIT 20")
     fun getPopular20Movies(): Flow<List<ListItem>>
 
-    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show WHERE voteCount > 1000 ORDER BY voteAverage DESC, popularity DESC LIMIT 20")
+    @Query("SELECT id, title, releaseDate, posterPath, popularity, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show WHERE voteCount > 1000 ORDER BY voteAverage DESC, popularity DESC LIMIT 20")
     fun getTop20TvShows(): Flow<List<ListItem>>
 
-    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show ORDER BY popularity DESC LIMIT 20")
+    @Query("SELECT id, title, releaseDate, posterPath, popularity, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show ORDER BY popularity DESC LIMIT 20")
     fun getPopular20TvShows(): Flow<List<ListItem>>
 
-    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE isWatchlist = 1")
+    @Query("SELECT id, title, releaseDate, posterPath, popularity, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE isWatchlist = 1")
     fun getAllWatchlistMovies(): Flow<List<ListItem>>
 
-    @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show WHERE isWatchlist = 1")
+    @Query("SELECT id, title, releaseDate, posterPath, popularity, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show WHERE isWatchlist = 1")
     fun getAllWatchlistTvShows(): Flow<List<ListItem>>
 
     @Query(
-        "SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE isWatchlist = 1 UNION " +
-                "SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show WHERE isWatchlist = 1"
+        "SELECT id, title, releaseDate, posterPath, voteAverage, popularity, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE isWatchlist = 1 UNION " +
+                "SELECT id, title, releaseDate, posterPath, voteAverage, popularity, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show WHERE isWatchlist = 1"
     )
     fun getAllWatchlistMedia(): Flow<List<ListItem>>
 
@@ -88,11 +88,17 @@ interface MovieDao {
     )
     fun getTvShowCrew(tvShowId: Int): Flow<List<CastCrewPerson>>
 
-    @Query("SELECT m.id, m.title, m.releaseDate, m.posterPath, m.voteAverage, m.isWatchlist, m.updatedAt, 'movie' AS mediaType FROM movie m INNER JOIN media_recommendation r ON r.recommendedId = m.id WHERE r.mediaType = 'movie' AND r.id = :movieId")
-    fun getRecommendedMovies(movieId: Int) :Flow<List<ListItem>>
+    @Query("SELECT * FROM (SELECT id, title, popularity, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie UNION SELECT id, title, popularity, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show) as m INNER JOIN credits c ON m.mediaType = c.mediaType AND m.id = c.mediaId AND c.personId = :personId WHERE c.job = 'acting' ORDER BY popularity DESC")
+    fun getPersonMediaCast(personId: Int): Flow<List<ListItem>>
 
-    @Query("SELECT t.id, t.title, t.releaseDate, t.posterPath, t.voteAverage, t.isWatchlist, t.updatedAt, 'tv' AS mediaType FROM tv_show t INNER JOIN media_recommendation r ON r.recommendedId = t.id WHERE r.mediaType = 'tv' AND r.id = :tvShowId")
-    fun getRecommendedTvShows(tvShowId: Int) :Flow<List<ListItem>>
+    @Query("SELECT * FROM (SELECT id, title, popularity, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie UNION SELECT id, title, popularity, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show) as m INNER JOIN credits c ON m.mediaType = c.mediaType AND m.id = c.mediaId AND c.personId = :personId WHERE c.job != 'acting' ORDER BY popularity DESC")
+    fun getPersonMediaCrew(personId: Int): Flow<List<ListItem>>
+
+    @Query("SELECT m.id, m.title, m.popularity, m.releaseDate, m.posterPath, m.voteAverage, m.isWatchlist, m.updatedAt, 'movie' AS mediaType FROM movie m INNER JOIN media_recommendation r ON r.recommendedId = m.id WHERE r.mediaType = 'movie' AND r.id = :movieId")
+    fun getRecommendedMovies(movieId: Int): Flow<List<ListItem>>
+
+    @Query("SELECT t.id, t.title, t.popularity, t.releaseDate, t.posterPath, t.voteAverage, t.isWatchlist, t.updatedAt, 'tv' AS mediaType FROM tv_show t INNER JOIN media_recommendation r ON r.recommendedId = t.id WHERE r.mediaType = 'tv' AND r.id = :tvShowId")
+    fun getRecommendedTvShows(tvShowId: Int): Flow<List<ListItem>>
 
     @Query("SELECT * FROM media_genre WHERE id = :movieId AND mediaType = 'movie'")
     fun getMovieGenres(movieId: Int): Flow<List<MediaGenre>>

@@ -2,6 +2,8 @@ package com.example.moviedb.features.details.person
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
@@ -9,16 +11,23 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.moviedb.R
 import com.example.moviedb.databinding.FragmentPersonDetailsBinding
+import com.example.moviedb.features.details.MediaDetailsFragmentDirections
+import com.example.moviedb.features.details.MediaDetailsViewModel
+import com.example.moviedb.shared.ListItemAdapter
 import com.example.moviedb.util.Resource
+import com.example.moviedb.util.exhaustive
+import com.example.moviedb.util.showSnackbar
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class PersonDetailsFragment: Fragment(R.layout.fragment_person_details) {
+class PersonDetailsFragment : Fragment(R.layout.fragment_person_details) {
     private val viewModel: PersonDetailsViewModel by viewModels()
 
     private var currentBinding: FragmentPersonDetailsBinding? = null
@@ -29,11 +38,46 @@ class PersonDetailsFragment: Fragment(R.layout.fragment_person_details) {
 
         currentBinding = FragmentPersonDetailsBinding.bind(view)
 
+        val personCastAdapter = ListItemAdapter(
+            onItemClick = { item ->
+                viewModel.onItemListClick(item)
+            },
+            onWatchlistClick = { item ->
+                viewModel.onWatchlistClick(item)
+            }
+        )
+
+        val personCrewAdapter = ListItemAdapter(
+            onItemClick = { item ->
+                viewModel.onItemListClick(item)
+            },
+            onWatchlistClick = { item ->
+                viewModel.onWatchlistClick(item)
+            }
+        )
+
         binding.apply {
             toolbar.apply {
                 setNavigationOnClickListener { findNavController().navigateUp() }
                 setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
             }
+
+            recyclerViewAsActor.apply {
+                adapter = personCastAdapter
+                layoutManager =
+                    LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+                setHasFixedSize(true)
+                itemAnimator?.changeDuration = 0
+            }
+
+            recyclerViewAsCrew.apply {
+                adapter = personCrewAdapter
+                layoutManager =
+                    LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+                setHasFixedSize(true)
+                itemAnimator?.changeDuration = 0
+            }
+
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 launch {
                     viewModel.personDetails.collect {
@@ -49,10 +93,13 @@ class PersonDetailsFragment: Fragment(R.layout.fragment_person_details) {
                         textViewBiography.isVisible = result is Resource.Success
                         textViewAsActorText.isVisible = result is Resource.Success
                         textViewAsCrewText.isVisible = result is Resource.Success
+                        recyclerViewAsActor.isVisible = result is Resource.Success
+                        recyclerViewAsCrew.isVisible = result is Resource.Success
 
 
                         toolbar.title = result.data?.title
-                        textViewBirth.text = result.data?.birthday + " in " + result.data?.placeOfBirth
+                        textViewBirth.text =
+                            result.data?.birthday + " in " + result.data?.placeOfBirth
                         textViewKnownFor.text = result.data?.knownForDepartment
                         textViewBiography.text = result.data?.biography
                         Glide.with(imageViewProfile)
@@ -67,37 +114,87 @@ class PersonDetailsFragment: Fragment(R.layout.fragment_person_details) {
                                 ?: getString(R.string.unknown_error_occurred)
                         )
 
-                        if(textViewBiography.layout != null && !imageViewExpand.isVisible) {
-                            imageViewExpand.isVisible = textViewBiography.layout.getEllipsisCount(textViewBiography.lineCount - 1) > 0 && result is Resource.Success
+                        if (textViewBiography.layout != null && !imageViewExpand.isVisible) {
+                            imageViewExpand.isVisible =
+                                textViewBiography.layout.getEllipsisCount(textViewBiography.lineCount - 1) > 0 && result is Resource.Success
+                        }
+                        textViewHomepage.setOnClickListener {
+                            if (!result.data?.homepage.isNullOrBlank()){
+                                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(result.data?.homepage))
+                                startActivity(webIntent)
+                            } else {
+                                showSnackbar(getString(R.string.no_homepage_available), duration = Snackbar.LENGTH_SHORT)
+                            }
                         }
                     }
                 }
 
+                launch {
+                    viewModel.personMediaCast.collect {
+                        val result = it ?: return@collect
+
+                        personCastAdapter.submitList(result.data)
+                    }
+                }
+
+                launch {
+                    viewModel.personMediaCrew.collect {
+                        val result = it ?: return@collect
+
+                        personCrewAdapter.submitList(result.data)
+                    }
+                }
+
                 viewOverviewContainer.setOnClickListener {
-                    when(textViewBiography.lineCount) {
+                    when (textViewBiography.lineCount) {
                         5 -> {
                             val animatorSet = AnimatorSet()
-                            val textViewObjectAnimator = ObjectAnimator.ofInt(textViewBiography, "maxLines", 50)
-                            textViewObjectAnimator.duration = 100 * textViewBiography.lineCount.toLong()
-                            val imageViewObjectAnimator = ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 1f, 0f)
+                            val textViewObjectAnimator =
+                                ObjectAnimator.ofInt(textViewBiography, "maxLines", 50)
+                            textViewObjectAnimator.duration =
+                                100 * textViewBiography.lineCount.toLong()
+                            val imageViewObjectAnimator =
+                                ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 1f, 0f)
                             imageViewObjectAnimator.duration = 300
-                            animatorSet.playTogether(textViewObjectAnimator, imageViewObjectAnimator)
+                            animatorSet.playTogether(
+                                textViewObjectAnimator,
+                                imageViewObjectAnimator
+                            )
 
                             animatorSet.start()
                         }
                         else -> {
                             val animatorSet = AnimatorSet()
-                            val textViewObjectAnimator = ObjectAnimator.ofInt(textViewBiography, "maxLines", 5)
+                            val textViewObjectAnimator =
+                                ObjectAnimator.ofInt(textViewBiography, "maxLines", 5)
                             textViewObjectAnimator.duration = 300
-                            val imageViewObjectAnimator = ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 0f, 1f)
+                            val imageViewObjectAnimator =
+                                ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 0f, 1f)
                             imageViewObjectAnimator.duration = 300
-                            animatorSet.playTogether(textViewObjectAnimator, imageViewObjectAnimator)
+                            animatorSet.playTogether(
+                                textViewObjectAnimator,
+                                imageViewObjectAnimator
+                            )
 
                             animatorSet.start()
                         }
                     }
                 }
 
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is PersonDetailsViewModel.Event.NavigateToMediaDetailsFragment -> {
+                        val action =
+                            PersonDetailsFragmentDirections.actionPersonDetailsFragmentToMediaDetailsFragment(
+                                event.listItem
+                            )
+                        findNavController().navigate(action)
+                    }
+                }.exhaustive
             }
         }
     }

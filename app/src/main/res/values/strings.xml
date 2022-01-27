@@ -16,7 +16,7 @@
     <string name="search_the_database">Search the database</string>
     <string name="could_not_load_search_results">Could not load search results: %s</string>
     <string name="directed_by">DIRECTED BY</string>
-    <string name="trailer">TRAILER</string>
+    <string name="trailer"><u>TRAILER</u></string>
     <string name="cast_crew">CAST + CREW</string>
     <string name="details">DETAILS</string>
     <string name="genre">GENRE</string>
@@ -24,7 +24,8 @@
     <string name="status">STATUS</string>
     <string name="release_date">RELEASE DATE</string>
     <string name="budget">BUDGET</string>
-    <string name="homepage">HOMEPAGE</string>
+    <string name="no_homepage_available">No homepage available...</string>
+    <string name="homepage"><u>HOMEPAGE</u></string>
     <string name="recommended">Recommended</string>
     <string name="cast">CAST</string>
     <string name="crew">CREW</string>
