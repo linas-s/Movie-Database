@@ -6,6 +6,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.example.moviedb.data.*
+import com.example.moviedb.features.details.MediaDetailsViewModel
 import com.example.moviedb.features.home.HomeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -40,7 +41,7 @@ class SearchViewModel @Inject constructor(
     var newQueryInProgress = false
     var pendingScrollToTopAfterNewQuery = false
 
-    fun onSearchQuerySubmit(query: String){
+    fun onSearchQuerySubmit(query: String) {
         refreshOnInit = true
         currentQuery.value = query
         newQueryInProgress = true
@@ -69,29 +70,37 @@ class SearchViewModel @Inject constructor(
     fun onSearchItemClick(searchListItem: SearchListItem) {
         viewModelScope.launch {
             when (searchListItem.mediaType) {
-                "movie" -> {
-                    val movie = repository.getMovie(searchListItem.id)
-                    onMovieSelected(movie)
+                "person" -> {
+                    onPersonSelected(searchListItem.id)
                 }
-                "tv_show" -> {
-                    val tvShow = repository.getTvShow(searchListItem.id)
-                    onTvShowSelected(tvShow)
+                else -> {
+                    val listItem = ListItem(
+                        id = searchListItem.id,
+                        title = searchListItem.title,
+                        mediaType = searchListItem.mediaType,
+                        releaseDate = "",
+                        posterPath = searchListItem.posterPath,
+                        voteAverage = 0.0,
+                        isWatchlist = false,
+                        updatedAt = 0
+                    )
+                    onMediaSelected(listItem)
                 }
             }
         }
     }
 
-    private fun onMovieSelected(movie: Movie) = viewModelScope.launch {
-        eventChannel.send(Event.NavigateToMovieDetailsFragment(movie))
+    private fun onMediaSelected(listItem: ListItem) = viewModelScope.launch {
+        eventChannel.send(Event.NavigateToDetailsFragment(listItem))
     }
 
-    private fun onTvShowSelected(tvShow: TvShow) = viewModelScope.launch {
-
+    private fun onPersonSelected(id: Int) = viewModelScope.launch {
+        eventChannel.send(Event.NavigateToPersonDetailsFragment(id))
     }
 
     sealed class Event {
-        data class NavigateToMovieDetailsFragment(val movie: Movie) : Event()
-        data class NavigateToTvShowDetailsFragment(val tvShow: TvShow) : Event()
+        data class NavigateToDetailsFragment(val listItem: ListItem) : Event()
+        data class NavigateToPersonDetailsFragment(val id: Int) : Event()
     }
 
 }

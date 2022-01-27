@@ -83,13 +83,12 @@
                 tools:visibility="visible" />
 
             <TextView
-                android:id="@+id/text_view_directed_by"
+                android:id="@+id/text_view_directed_created_by"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginRight="10dp"
-                android:text="@string/directed_by"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toStartOf="@+id/image_view_poster"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -108,21 +107,18 @@
                 app:layout_constraintEnd_toStartOf="@+id/image_view_poster"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_directed_by"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_directed_created_by"
                 tools:text="Director"
                 tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/text_view_release_date_runtime"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="@+id/image_view_poster"
-                app:layout_constraintEnd_toStartOf="@+id/text_view_trailer"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_director"
                 tools:text="2022 - 120 min"
@@ -130,7 +126,7 @@
 
             <TextView
                 android:id="@+id/text_view_trailer"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
@@ -404,7 +400,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="recycler_view_crew,recycler_view_genres, text_view_budget" />
+                app:constraint_referenced_ids="recycler_view_crew,recycler_view_genres, text_view_budget, text_view_homepage" />
 
             <TextView
                 android:id="@+id/text_view_recommended"

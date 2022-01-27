@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -14,7 +13,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.moviedb.R
-import com.example.moviedb.databinding.FragmentMovieDetailsBinding
 import com.example.moviedb.shared.CastCrewItemAdapter
 import com.example.moviedb.shared.ListItemAdapter
 import com.example.moviedb.util.Resource
@@ -27,38 +25,44 @@ import java.text.NumberFormat
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import com.example.moviedb.databinding.FragmentMediaDetailsBinding
+import com.example.moviedb.features.watchlist.WatchlistFragmentDirections
+import com.example.moviedb.features.watchlist.WatchlistViewModel
+import com.example.moviedb.util.exhaustive
 
 
 @AndroidEntryPoint
-class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
-    private val viewModel: MovieDetailsViewModel by viewModels()
+class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
+    private val viewModel: MediaDetailsViewModel by viewModels()
 
-    private var currentBinding: FragmentMovieDetailsBinding? = null
+    private var currentBinding: FragmentMediaDetailsBinding? = null
     private val binding get() = currentBinding!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        currentBinding = FragmentMovieDetailsBinding.bind(view)
+        currentBinding = FragmentMediaDetailsBinding.bind(view)
 
         val castAdapter = CastCrewItemAdapter(
             onItemClick = { cast ->
-
+                viewModel.onPersonClick(cast)
             }
         )
 
         val crewAdapter = CastCrewItemAdapter(
             onItemClick = { crew ->
-
+                viewModel.onPersonClick(crew)
             }
         )
 
         val recommendationAdapter = ListItemAdapter(
-            onItemClick = {
-
+            onItemClick = { item ->
+                viewModel.onRecommendedListItemClick(item)
             },
-            onWatchlistClick = {
-
+            onWatchlistClick = { item ->
+                viewModel.onWatchlistClick(item)
             }
         )
 
@@ -110,7 +114,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 launch {
-                    viewModel.movie.collect {
+                    viewModel.media.collect {
                         val result = it ?: return@collect
 
                         progressBar.isVisible = result is Resource.Loading
@@ -121,12 +125,12 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                         textViewReleaseDateRuntime.isVisible = result is Resource.Success
                         textViewTagline.isVisible = result is Resource.Success
                         textViewOverview.isVisible = result is Resource.Success
-                        textViewDirectedBy.isVisible = result is Resource.Success
+                        textViewDirectedCreatedBy.isVisible = result is Resource.Success
                         textViewDirector.isVisible = result is Resource.Success
                         textViewRating.isVisible = result is Resource.Success
                         textViewTrailer.isVisible = result is Resource.Success
-                        textViewRecommended.isVisible = result is Resource.Success
                         imageViewStar.isVisible = result is Resource.Success
+
 
                         Glide.with(imageViewBackdrop)
                             .load(result.data?.backdropUrl)
@@ -146,13 +150,22 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
 
                         textViewTitle.text = result.data?.title ?: ""
                         toolbar.title = result.data?.title ?: ""
-                        toolbar.setTitleTextColor(Color.TRANSPARENT)
-                        textViewReleaseDateRuntime.text =
-                            result.data?.releaseYear + " · " + result.data?.runtime + " mins"
+                        if(scrollView.scrollY == 0)toolbar.setTitleTextColor(Color.TRANSPARENT)
+
 
                         textViewOverview.text = result.data?.overview ?: ""
-                        if(textViewOverview.layout != null) {
+                        if(textViewOverview.layout != null && !imageViewExpand.isVisible) {
                             imageViewExpand.isVisible = textViewOverview.layout.getEllipsisCount(textViewOverview.lineCount - 1) > 0 && result is Resource.Success
+                        }
+
+                        if(result.data?.mediaType == "movie") {
+                            textViewDirectedCreatedBy.text = "DIRECTED BY"
+                            textViewReleaseDateRuntime.text =
+                                result.data?.releaseYear + " · " + result.data?.runtime + " mins"
+                        } else {
+                            textViewDirectedCreatedBy.text = "CREATED BY"
+                            textViewReleaseDateRuntime.text =
+                                result.data?.runningYears + " · " + result.data?.seasons
                         }
 
                         textViewTagline.text = result.data?.tagline ?: ""
@@ -160,7 +173,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                         textViewVoteCount.text = NumberFormat.getInstance().format(result.data?.voteCount).toString()
                         textViewHomepage.text = if(result.data?.homepage.isNullOrEmpty()) "No homepage available..." else result.data?.homepage
                         textViewStatus.text = result.data?.status ?: "No status available..."
-                        textViewBudget.text = "$" + NumberFormat.getInstance().format(result.data?.budget ?: 0).toString()
+                        textViewBudget.text = result.data?.budgetText
                         textViewReleaseDate.text =
                             result.data?.releaseDate ?: "Unknown release date..."
 
@@ -168,7 +181,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                 }
 
                 launch {
-                    viewModel.movieCast.collect {
+                    viewModel.mediaCast.collect {
                         val result = it ?: return@collect
 
                         textViewCast.isVisible = result is Resource.Success
@@ -179,17 +192,16 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                 }
 
                 launch {
-                    viewModel.movieCrew.collect {
+                    viewModel.mediaCrew.collect {
                         val result = it ?: return@collect
 
                         textViewCrew.isVisible = result is Resource.Success
+
                         recyclerViewCrew.isVisible = result is Resource.Success
 
-                        val movieDirectors = result.data?.filter { person ->
-                            person.job == "Director"
-                        }
+                        val directorsCreators = viewModel.getDirectorsCreators(result.data)
 
-                        textViewDirector.text = movieDirectors?.joinToString { director ->
+                        textViewDirector.text = directorsCreators?.joinToString { director ->
                             director.title
                         }
 
@@ -198,16 +210,17 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                 }
 
                 launch {
-                    viewModel.movieGenres.collect {
+                    viewModel.mediaGenres.collect {
                         val result = it ?: return@collect
                         genreAdapter.submitList(result.data)
                     }
                 }
 
                 launch {
-                    viewModel.movieRecommendations.collect {
+                    viewModel.mediaRecommendations.collect {
                         val result = it ?: return@collect
 
+                        textViewRecommended.isVisible = result is Resource.Success
                         recyclerViewRecommended.isVisible = result is Resource.Success
 
                         recommendationAdapter.submitList(result.data)
@@ -215,7 +228,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                 }
 
                 launch {
-                    viewModel.movieVideo.collect {
+                    viewModel.mediaVideo.collect {
                         val result = it ?: return@collect
 
                         textViewTrailer.setOnClickListener {
@@ -238,7 +251,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                 when(textViewOverview.lineCount) {
                     3 -> {
                         val animatorSet = AnimatorSet()
-                        val textViewObjectAnimator = ObjectAnimator.ofInt(textViewOverview, "maxLines", 10)
+                        val textViewObjectAnimator = ObjectAnimator.ofInt(textViewOverview, "maxLines", 25)
                         textViewObjectAnimator.duration = 100 * textViewOverview.lineCount.toLong()
                         val imageViewObjectAnimator = ObjectAnimator.ofFloat(imageViewExpand, View.ALPHA, 1f, 0f)
                         imageViewObjectAnimator.duration = 300
@@ -267,6 +280,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                             groupCastCrew.isVisible = true
                             groupDetails.isVisible = false
                             groupGenre.isVisible = false
+
                         }
                         1 -> {
                             groupCastCrew.isVisible = false
@@ -309,6 +323,27 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_movie_details) {
                             toolbar.setTitleTextColor(Color.WHITE)
                         }
                     }
+                }
+            }
+
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.events.collect { event ->
+                    when (event) {
+                        is MediaDetailsViewModel.Event.NavigateToMediaDetailsFragment -> {
+                            val action =
+                                MediaDetailsFragmentDirections.actionMediaDetailsFragmentSelf(
+                                    event.listItem
+                                )
+                            findNavController().navigate(action)
+                        }
+                        is MediaDetailsViewModel.Event.NavigateToPersonDetailsFragment -> {
+                            val action =
+                                MediaDetailsFragmentDirections.actionMediaDetailsFragmentToPersonDetailsFragment(
+                                    event.id
+                                )
+                            findNavController().navigate(action)
+                        }
+                    }.exhaustive
                 }
             }
         }

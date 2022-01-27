@@ -84,7 +84,9 @@ class SearchMediaRemoteMediator(
                     backdropPath = serverSearchResultMedia.backdrop_path,
                     posterPath = serverSearchResultMedia.poster_path,
                     homepage = null,
-                    isWatchlist = isWatchlist
+                    isWatchlist = isWatchlist,
+                    numberOfSeasons = null,
+                    tagline = ""
                 )
             }
 
@@ -99,7 +101,9 @@ class SearchMediaRemoteMediator(
                     knownForDepartment = serverSearchResultMedia.known_for_department ?: "",
                     birthday = null,
                     deathDay = null,
-                    homepage = null
+                    homepage = null,
+                    placeOfBirth = null,
+                    biography = null
                 )
             }
 

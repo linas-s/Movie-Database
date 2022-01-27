@@ -27,7 +27,9 @@ data class TvShowDto(
     val overview: String,
     val backdrop_path: String?,
     val poster_path: String?,
-    val homepage: String?
+    val tagline: String?,
+    val homepage: String?,
+    val numberOfSeasons: Int?
 )
 
 data class CastCrewDto(
@@ -74,6 +76,32 @@ data class MovieDetailsDto(
     val status: String,
     val budget: Int,
     val genres: List<GenreDto>
+)
+
+data class TvShowDetailsDto(
+    val id: Int,
+    val name: String,
+    val first_air_date: String,
+    val popularity: Double,
+    val vote_average: Double,
+    val vote_count: Int,
+    val overview: String,
+    val backdrop_path: String?,
+    val poster_path: String?,
+    val homepage: String,
+    val tagline: String,
+    val status: String,
+    val genres: List<GenreDto>,
+    val created_by: List<CreatedByDto>,
+    val number_of_seasons: Int,
+    val last_air_date: String
+)
+
+data class CreatedByDto(
+    val id: Int,
+    val credit_id: String,
+    val name: String,
+    val profile_path: String?
 )
 
 data class GenreDto(

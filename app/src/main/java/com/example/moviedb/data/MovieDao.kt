@@ -13,8 +13,14 @@ interface MovieDao {
     @Query("SELECT * FROM tv_show WHERE id = :id")
     suspend fun getTvShow(id: Int): TvShow
 
-    @Query("SELECT * FROM movie WHERE id = :id")
-    fun getMovieFlow(id: Int): Flow<Movie>
+    @Query("SELECT * FROM person WHERE id = :id")
+    fun getPerson(id: Int): Flow<Person>
+
+    @Query("SELECT id, title, tagline, releaseDate, lastAirDate, popularity, voteCount, voteAverage, overview, backdropPath, posterPath, homepage, status, null as runtime, null as budget, numberOfSeasons, 'tv_show' as mediaType FROM tv_show WHERE id = :id")
+    fun getTvShowFlow(id: Int): Flow<MediaDetails>
+
+    @Query("SELECT id, title, tagline, releaseDate, popularity, voteCount, voteAverage, overview, backdropPath, posterPath, homepage, status, budget, runtime, null as numberOfSeasons, null as lastAirDate, 'movie' as mediaType FROM movie WHERE id = :id")
+    fun getMovieFlow(id: Int): Flow<MediaDetails>
 
     @Query("SELECT id, title, releaseDate, posterPath, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE voteCount > 5000 ORDER BY voteAverage DESC, popularity DESC LIMIT 20")
     fun getTop20Movies(): Flow<List<ListItem>>
@@ -50,7 +56,7 @@ interface MovieDao {
         "SELECT p.id, p.title, p.posterPath, p.popularity, c.character, c.job, c.listOrder FROM Person p\n" +
                 "INNER JOIN\n" +
                 "Credits c on p.id = c.personId\n" +
-                "WHERE c.mediaId = :movieId AND c.character IS NOT NULL \n" +
+                "WHERE c.mediaId = :movieId AND c.mediaType = 'movie' AND c.character IS NOT NULL \n" +
                 "ORDER BY listOrder"
     )
     fun getMovieCast(movieId: Int): Flow<List<CastCrewPerson>>
@@ -59,22 +65,52 @@ interface MovieDao {
         "SELECT p.id, p.title, p.posterPath, p.popularity, c.character, c.job, c.listOrder FROM Person p\n" +
                 "INNER JOIN\n" +
                 "Credits c on p.id = c.personId\n" +
-                "WHERE c.mediaId = :movieId AND c.character IS NULL \n" +
+                "WHERE c.mediaId = :tvShowId AND c.mediaType = 'tv' AND c.character IS NOT NULL \n" +
+                "ORDER BY listOrder"
+    )
+    fun getTvShowCast(tvShowId: Int): Flow<List<CastCrewPerson>>
+
+    @Query(
+        "SELECT p.id, p.title, p.posterPath, p.popularity, c.character, c.job, c.listOrder FROM Person p\n" +
+                "INNER JOIN\n" +
+                "Credits c on p.id = c.personId\n" +
+                "WHERE c.mediaId = :movieId AND c.mediaType = 'movie' AND c.character IS NULL \n" +
                 "ORDER BY popularity DESC"
     )
     fun getMovieCrew(movieId: Int): Flow<List<CastCrewPerson>>
 
+    @Query(
+        "SELECT p.id, p.title, p.posterPath, p.popularity, c.character, c.job, c.listOrder FROM Person p\n" +
+                "INNER JOIN\n" +
+                "Credits c on p.id = c.personId\n" +
+                "WHERE c.mediaId = :tvShowId AND c.mediaType = 'tv' AND c.character IS NULL \n" +
+                "ORDER BY popularity DESC"
+    )
+    fun getTvShowCrew(tvShowId: Int): Flow<List<CastCrewPerson>>
+
     @Query("SELECT m.id, m.title, m.releaseDate, m.posterPath, m.voteAverage, m.isWatchlist, m.updatedAt, 'movie' AS mediaType FROM movie m INNER JOIN media_recommendation r ON r.recommendedId = m.id WHERE r.mediaType = 'movie' AND r.id = :movieId")
     fun getRecommendedMovies(movieId: Int) :Flow<List<ListItem>>
+
+    @Query("SELECT t.id, t.title, t.releaseDate, t.posterPath, t.voteAverage, t.isWatchlist, t.updatedAt, 'tv' AS mediaType FROM tv_show t INNER JOIN media_recommendation r ON r.recommendedId = t.id WHERE r.mediaType = 'tv' AND r.id = :tvShowId")
+    fun getRecommendedTvShows(tvShowId: Int) :Flow<List<ListItem>>
 
     @Query("SELECT * FROM media_genre WHERE id = :movieId AND mediaType = 'movie'")
     fun getMovieGenres(movieId: Int): Flow<List<MediaGenre>>
 
+    @Query("SELECT * FROM media_genre WHERE id = :tvShowId AND mediaType = 'tv'")
+    fun getTvShowGenres(tvShowId: Int): Flow<List<MediaGenre>>
+
     @Query("SELECT * FROM media_video WHERE id = :movieId AND mediaType = 'movie'")
     fun getMovieVideo(movieId: Int): Flow<MediaVideo>
 
+    @Query("SELECT * FROM media_video WHERE id = :tvShowId AND mediaType = 'tv'")
+    fun getTvShowVideo(tvShowId: Int): Flow<MediaVideo>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovie(movie: Movie)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTvShow(tvShow: TvShow)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRecommendations(recommendations: List<MediaRecommendation>)
@@ -87,6 +123,9 @@ interface MovieDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPersons(persons: List<Person>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPerson(person: Person)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSearchResults(searchResults: List<SearchResult>)

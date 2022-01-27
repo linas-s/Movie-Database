@@ -62,9 +62,40 @@ interface MovieApi {
         @Query("page") page: Int
     ): MovieListResponse
 
+    @GET("tv/{tv_id}/recommendations\n")
+    suspend fun getRecommendedTvShows(
+        @Path("tv_id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY,
+        @Query("page") page: Int
+    ): TvShowsListResponse
+
     @GET("movie/{id}/videos")
     suspend fun getMovieVideos(
         @Path("id") id: Int,
         @Query("api_key") apiKey: String = API_KEY
-    ): MovieVideoResponse
+    ): MediaVideoResponse
+
+    @GET("tv/{tv_id}/videos")
+    suspend fun getTvShowVideos(
+        @Path("tv_id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY
+    ): MediaVideoResponse
+
+    @GET("tv/{tv_id}")
+    suspend fun getTvShowDetails(
+        @Path("tv_id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY
+    ): TvShowDetailsDto
+
+    @GET("tv/{tv_id}/credits")
+    suspend fun getTvShowCredits(
+        @Path("tv_id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY,
+    ): CreditsResponse
+
+    @GET("person/{person_id}")
+    suspend fun getPersonDetails(
+        @Path("person_id") id: Int,
+        @Query("api_key") apiKey: String = API_KEY
+    ): PersonDetailsDto
 }

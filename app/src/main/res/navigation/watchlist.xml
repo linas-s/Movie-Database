@@ -9,15 +9,32 @@
         android:name="com.example.moviedb.features.watchlist.WatchlistFragment"
         android:label="WatchlistFragment" >
         <action
-            android:id="@+id/action_watchlistFragment_to_movieDetailsFragment"
-            app:destination="@id/movieDetailsFragment" />
+            android:id="@+id/action_watchlistFragment_to_mediaDetailsFragment"
+            app:destination="@id/mediaDetailsFragment" />
+        <action
+            android:id="@+id/action_watchlistFragment_to_personDetailsFragment"
+            app:destination="@id/personDetailsFragment" />
     </fragment>
     <fragment
-        android:id="@+id/movieDetailsFragment"
-        android:name="com.example.moviedb.features.details.MovieDetailsFragment"
-        android:label="{title}">
+        android:id="@+id/mediaDetailsFragment"
+        android:name="com.example.moviedb.features.details.MediaDetailsFragment"
+        android:label="MediaDetailsFragment" >
         <argument
-            android:name="movie"
-            app:argType="com.example.moviedb.data.Movie" />
+            android:name="listItem"
+            app:argType="com.example.moviedb.data.ListItem" />
+        <action
+            android:id="@+id/action_mediaDetailsFragment_self"
+            app:destination="@id/mediaDetailsFragment" />
+        <action
+            android:id="@+id/action_mediaDetailsFragment_to_personDetailsFragment"
+            app:destination="@id/personDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/personDetailsFragment"
+        android:name="com.example.moviedb.features.details.person.PersonDetailsFragment"
+        android:label="PersonDetailsFragment" >
+        <argument
+            android:name="Id"
+            app:argType="integer" />
     </fragment>
 </navigation>

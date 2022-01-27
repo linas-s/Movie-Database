@@ -1,7 +1,6 @@
 package com.example.moviedb.features.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.moviedb.data.ListItem
 import com.example.moviedb.data.Movie
@@ -132,20 +131,12 @@ class HomeViewModel @Inject constructor(
 
     fun onItemListClick(listItem: ListItem) {
         viewModelScope.launch {
-            when (listItem.mediaType) {
-                "movie" -> {
-                    val movie = repository.getMovie(listItem.id)
-                    onMovieSelected(movie)
-                }
-                else -> {
-
-                }
-            }
+            onMediaSelected(listItem)
         }
     }
 
-    private fun onMovieSelected(movie: Movie) = viewModelScope.launch {
-        eventChannel.send(Event.NavigateToMovieDetailsFragment(movie))
+    private fun onMediaSelected(listItem: ListItem) = viewModelScope.launch {
+        eventChannel.send(Event.NavigateToMediaDetailsFragment(listItem))
     }
 
     enum class Refresh {
@@ -154,7 +145,7 @@ class HomeViewModel @Inject constructor(
 
     sealed class Event {
         data class ShowErrorMessage(val error: Throwable) : Event()
-        data class NavigateToMovieDetailsFragment(val movie: Movie) : Event()
+        data class NavigateToMediaDetailsFragment(val listItem: ListItem) : Event()
     }
 
 }

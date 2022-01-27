@@ -44,31 +44,16 @@ class WatchlistViewModel @Inject constructor(
 
     fun onWatchlistItemClick(listItem: ListItem) {
         viewModelScope.launch {
-            when (listItem.mediaType) {
-                "movie" -> {
-                    val movie = repository.getMovie(listItem.id)
-                    onMovieSelected(movie)
-                }
-                "tv_show" -> {
-                    val tvShow = repository.getTvShow(listItem.id)
-                    onTvShowSelected(tvShow)
-                }
-            }
+            onMediaSelected(listItem)
         }
     }
 
-    private fun onMovieSelected(movie: Movie) = viewModelScope.launch {
-        eventChannel.send(WatchlistViewModel.Event.NavigateToMovieDetailsFragment(movie))
+    private fun onMediaSelected(listItem: ListItem) = viewModelScope.launch {
+        eventChannel.send(Event.NavigateToMediaDetailsFragment(listItem))
     }
-
-    private fun onTvShowSelected(tvShow: TvShow) = viewModelScope.launch {
-
-    }
-
 
     sealed class Event {
-        data class NavigateToMovieDetailsFragment(val movie: Movie) : Event()
-        data class NavigateToTvShowDetailsFragment(val tvShow: TvShow) : Event()
+        data class NavigateToMediaDetailsFragment(val listItem: ListItem) : Event()
     }
 
     fun onDeleteWatchlist() {

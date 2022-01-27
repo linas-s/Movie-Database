@@ -33,4 +33,8 @@
     <string name="top_tv_shows">TOP TV SHOWS</string>
     <string name="popular_tv_shows">POPULAR TV SHOWS</string>
     <string name="genres">GENRES</string>
+    <string name="born">BORN </string>
+    <string name="known_for">KNOWN FOR </string>
+    <string name="as_actor">AS ACTOR</string>
+    <string name="as_crew">AS CREW</string>
 </resources>

@@ -21,7 +21,10 @@
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/font/graphik.xml" value="0.34629629629629627" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_home.xml" value="0.264" />
+        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_media_details.xml" value="0.536" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_movie_details.xml" value="0.42665289256198347" />
+        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_person.xml" value="0.264" />
+        <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_person_details.xml" value="0.35" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_search.xml" value="0.4" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/fragment_watchlist.xml" value="0.4" />
         <entry key="..\:/Users/Linas/Desktop/kotlin apps/MovieDB2/app/src/main/res/layout/item_cast_crew.xml" value="0.1" />

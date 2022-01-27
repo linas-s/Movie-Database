@@ -52,7 +52,7 @@ class HomeFragment : Fragment(R.layout.fragment_home){
 
         val topTvShowAdapter = ListItemAdapter(
             onItemClick = { item ->
-
+                viewModel.onItemListClick(item)
             },
             onWatchlistClick = { item ->
                 viewModel.onWatchlistClick(item)
@@ -61,7 +61,7 @@ class HomeFragment : Fragment(R.layout.fragment_home){
 
         val popularTvShowAdapter = ListItemAdapter(
             onItemClick = { item ->
-
+                viewModel.onItemListClick(item)
             },
             onWatchlistClick = { item ->
                 viewModel.onWatchlistClick(item)
@@ -215,10 +215,10 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                                         ?: getString(R.string.unknown_error_occurred)
                                 )
                             )
-                        is HomeViewModel.Event.NavigateToMovieDetailsFragment -> {
+                        is HomeViewModel.Event.NavigateToMediaDetailsFragment -> {
                             val action =
-                                HomeFragmentDirections.actionHomeFragmentToMovieDetailsFragment(
-                                    event.movie
+                                HomeFragmentDirections.actionHomeFragmentToMediaDetailsFragment(
+                                    event.listItem
                                 )
                             findNavController().navigate(action)
                         }

@@ -57,8 +57,6 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {
                 }
             }
 
-            //requireActivity().window.statusBarColor = Color.parseColor("#445565")
-
             recyclerViewWatchlist.apply {
                 adapter = watchlistAdapter
                 layoutManager = LinearLayoutManager(requireContext())
@@ -78,14 +76,13 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.events.collect { event ->
                     when (event) {
-                        is WatchlistViewModel.Event.NavigateToMovieDetailsFragment -> {
+                        is WatchlistViewModel.Event.NavigateToMediaDetailsFragment -> {
                             val action =
-                                WatchlistFragmentDirections.actionWatchlistFragmentToMovieDetailsFragment(
-                                    event.movie
+                                WatchlistFragmentDirections.actionWatchlistFragmentToMediaDetailsFragment(
+                                    event.listItem
                                 )
                             findNavController().navigate(action)
                         }
-                        is WatchlistViewModel.Event.NavigateToTvShowDetailsFragment -> TODO()
                     }.exhaustive
                 }
             }

@@ -61,10 +61,6 @@ class SearchFragment : Fragment(R.layout.fragment_search){
                 }
             }
 
-            //swipeRefreshLayout.isEnabled = false
-
-            //textViewInstructions.isVisible = true
-
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.hasCurrentQuery.collect { hasCurrentQuery ->
                     textViewInstructions.isVisible = !hasCurrentQuery
@@ -166,14 +162,20 @@ class SearchFragment : Fragment(R.layout.fragment_search){
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.events.collect { event ->
                     when (event) {
-                        is SearchViewModel.Event.NavigateToMovieDetailsFragment -> {
+                        is SearchViewModel.Event.NavigateToDetailsFragment -> {
                             val action =
-                                SearchFragmentDirections.actionSearchFragmentToMovieDetailsFragment(
-                                    event.movie
+                                SearchFragmentDirections.actionSearchFragmentToMediaDetailsFragment(
+                                    event.listItem
                                 )
                             findNavController().navigate(action)
                         }
-                        is SearchViewModel.Event.NavigateToTvShowDetailsFragment -> TODO()
+                        is SearchViewModel.Event.NavigateToPersonDetailsFragment -> {
+                            val action =
+                                SearchFragmentDirections.actionSearchFragmentToPersonDetailsFragment(
+                                    event.id
+                                )
+                            findNavController().navigate(action)
+                        }
                     }.exhaustive
                 }
             }
