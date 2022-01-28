@@ -7,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.moviedb.data.CastCrewPerson
 import com.example.moviedb.data.ListItem
 import com.example.moviedb.data.MovieRepository
+import com.example.moviedb.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -53,10 +55,6 @@ class MediaDetailsViewModel @Inject constructor(
             repository.getTvShowRecommendations(media)
         }
         mediaRecommendations
-    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
-
-    val mediaVideo = receivedMedia.flatMapLatest { media ->
-        repository.getMediaVideo(media)
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     fun getDirectorsCreators(castCrewPersons: List<CastCrewPerson>?): List<CastCrewPerson>? {
@@ -107,8 +105,43 @@ class MediaDetailsViewModel @Inject constructor(
         eventChannel.send(Event.NavigateToPersonDetailsFragment(id))
     }
 
+    fun onTrailerClick() {
+        viewModelScope.launch {
+            onTrailerSelected()
+        }
+    }
+
+    fun onHomepageClick() {
+        viewModelScope.launch {
+            onHomepageSelected()
+        }
+    }
+
+    private fun onTrailerSelected() = viewModelScope.launch {
+        receivedMedia.flatMapLatest { media ->
+            repository.getMediaVideo(media)
+        }.collect { result ->
+            if(result is Resource.Success) {
+                eventChannel.send(Event.OpenMediaTrailer(result.data?.key))
+                cancel()
+            }
+        }
+    }
+
+    private fun onHomepageSelected() = viewModelScope.launch {
+        media.collect { result ->
+            if(result is Resource.Success) {
+                eventChannel.send(Event.OpenMediaHomepage(result.data?.homepage))
+                cancel()
+            }
+        }
+    }
+
+
     sealed class Event {
         data class NavigateToMediaDetailsFragment(val listItem: ListItem) : Event()
         data class NavigateToPersonDetailsFragment(val id: Int) : Event()
+        data class OpenMediaTrailer(val key: String?) : Event()
+        data class OpenMediaHomepage(val url: String?) : Event()
     }
 }

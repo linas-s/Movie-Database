@@ -92,11 +92,13 @@ data class ListItem(
     val posterPath: String?,
     val voteAverage: Double,
     val isWatchlist: Boolean,
+    val backdropPath: String?,
     val popularity: Double,
     val updatedAt: Long,
     val mediaType: String
 ) : Parcelable {
     val posterUrl: String get() = "https://image.tmdb.org/t/p/w500$posterPath"
+    val backdropUrl: String get() = "https://image.tmdb.org/t/p/original$backdropPath"
     val voteAverageRounded: String get() = DecimalFormat("#.#").format(voteAverage)
 }
 

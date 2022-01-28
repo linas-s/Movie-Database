@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/image_view_backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+    <ImageView
+        android:id="@+id/image_view_play_trailer"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        app:srcCompat="@drawable/ic_outline_play_circle_24"
+        app:layout_constraintBottom_toBottomOf="@+id/image_view_backdrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/image_view_backdrop"
+        app:tint="#0fc556" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/image_view_poster"
+        android:layout_width="90dp"
+        android:layout_height="135dp"
+        android:scaleType="centerCrop"
+        android:layout_margin="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/image_view_play_trailer"
+        app:shapeAppearanceOverlay="@style/roundedCorners"
+        tools:src="@tools:sample/backgrounds/scenic" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/image_view_watchlist"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_watchlist_unselected"
+        app:layout_constraintLeft_toLeftOf="@id/image_view_poster"
+        app:layout_constraintTop_toTopOf="@id/image_view_poster"
+        app:shapeAppearanceOverlay="@style/roundedCorners"
+        app:tint="#0fc556" />
+
+    <TextView
+        android:id="@+id/text_view_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        tools:text="title"
+        app:layout_constraintBottom_toBottomOf="@+id/image_view_poster"
+        app:layout_constraintStart_toEndOf="@+id/image_view_poster"
+        app:layout_constraintTop_toBottomOf="@+id/image_view_backdrop" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

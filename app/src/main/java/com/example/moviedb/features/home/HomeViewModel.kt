@@ -7,6 +7,7 @@ import com.example.moviedb.data.Movie
 import com.example.moviedb.data.MovieRepository
 import com.example.moviedb.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -139,6 +140,21 @@ class HomeViewModel @Inject constructor(
         eventChannel.send(Event.NavigateToMediaDetailsFragment(listItem))
     }
 
+    fun onTrailerClick(listItem: ListItem){
+        viewModelScope.launch {
+            onTrailerSelected(listItem)
+        }
+    }
+
+    private fun onTrailerSelected(listItem: ListItem) = viewModelScope.launch {
+        repository.getMediaVideo(listItem).collectLatest { result ->
+            if(result is Resource.Success) {
+                eventChannel.send(Event.OpenMediaTrailer(result.data?.key))
+                cancel()
+            }
+        }
+    }
+
     enum class Refresh {
         FORCE, NORMAL
     }
@@ -146,6 +162,7 @@ class HomeViewModel @Inject constructor(
     sealed class Event {
         data class ShowErrorMessage(val error: Throwable) : Event()
         data class NavigateToMediaDetailsFragment(val listItem: ListItem) : Event()
+        data class OpenMediaTrailer(val key: String?) : Event()
     }
 
 }

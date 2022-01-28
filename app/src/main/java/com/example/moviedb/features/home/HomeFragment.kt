@@ -1,5 +1,8 @@
 package com.example.moviedb.features.home
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
@@ -31,6 +34,18 @@ class HomeFragment : Fragment(R.layout.fragment_home){
         super.onViewCreated(view, savedInstanceState)
 
         currentBinding = FragmentHomeBinding.bind(view)
+
+        val viewPagerAdapter = ViewPagerAdapter(
+            onItemClick = { item ->
+                viewModel.onItemListClick(item)
+            },
+            onWatchlistClick = { item ->
+                viewModel.onWatchlistClick(item)
+            },
+            onTrailerClick = { item ->
+                viewModel.onTrailerClick(item)
+            }
+        )
 
         val topMovieAdapter = ListItemAdapter(
             onItemClick = { item ->
@@ -86,6 +101,10 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                 title = "Home"
             }
 
+            viewPager.apply {
+                adapter = viewPagerAdapter
+            }
+
             recyclerViewTopMovies.apply {
                 adapter = topMovieAdapter
                 layoutManager =
@@ -129,6 +148,7 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                                 viewModel.top20MoviesPendingScrollToTopAfterRefresh = false
                             }
                         }
+                        viewPagerAdapter.submitList(result.data)
                     }
                 }
 
@@ -221,6 +241,10 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                                     event.listItem
                                 )
                             findNavController().navigate(action)
+                        }
+                        is HomeViewModel.Event.OpenMediaTrailer -> {
+                            val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:${event.key}"))
+                            startActivity(appIntent)
                         }
                     }.exhaustive
                 }

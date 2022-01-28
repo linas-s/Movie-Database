@@ -2,6 +2,7 @@ package com.example.moviedb.features.search
 
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.moviedb.R
 import com.example.moviedb.data.SearchListItem
 import com.example.moviedb.databinding.ItemSearchListItemBinding
@@ -17,6 +18,7 @@ class SearchListItemViewHolder(
             Glide.with(itemView)
                 .load(searchListItem.posterUrl)
                 .error(R.drawable.ic_baseline_broken_image_24)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .into(imageViewPoster)
 
             textViewTitle.text = searchListItem.title

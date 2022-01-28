@@ -118,14 +118,6 @@ class PersonDetailsFragment : Fragment(R.layout.fragment_person_details) {
                             imageViewExpand.isVisible =
                                 textViewBiography.layout.getEllipsisCount(textViewBiography.lineCount - 1) > 0 && result is Resource.Success
                         }
-                        textViewHomepage.setOnClickListener {
-                            if (!result.data?.homepage.isNullOrBlank()){
-                                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(result.data?.homepage))
-                                startActivity(webIntent)
-                            } else {
-                                showSnackbar(getString(R.string.no_homepage_available), duration = Snackbar.LENGTH_SHORT)
-                            }
-                        }
                     }
                 }
 
@@ -133,7 +125,7 @@ class PersonDetailsFragment : Fragment(R.layout.fragment_person_details) {
                     viewModel.personMediaCast.collect {
                         val result = it ?: return@collect
 
-                        personCastAdapter.submitList(result.data)
+                        personCastAdapter.submitList(result.data?.distinct())
                     }
                 }
 
@@ -141,8 +133,12 @@ class PersonDetailsFragment : Fragment(R.layout.fragment_person_details) {
                     viewModel.personMediaCrew.collect {
                         val result = it ?: return@collect
 
-                        personCrewAdapter.submitList(result.data)
+                        personCrewAdapter.submitList(result.data?.distinct())
                     }
+                }
+
+                textViewHomepage.setOnClickListener {
+                    viewModel.onHomepageClick()
                 }
 
                 viewOverviewContainer.setOnClickListener {
@@ -193,6 +189,15 @@ class PersonDetailsFragment : Fragment(R.layout.fragment_person_details) {
                                 event.listItem
                             )
                         findNavController().navigate(action)
+                    }
+                    is PersonDetailsViewModel.Event.OpenPersonHomepage -> {
+                        if (!event.url.isNullOrBlank()) {
+                            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(event.url))
+                            startActivity(webIntent)
+                        }
+                        else {
+                            showSnackbar(getString(R.string.no_homepage_available), duration = Snackbar.LENGTH_SHORT)
+                        }
                     }
                 }.exhaustive
             }

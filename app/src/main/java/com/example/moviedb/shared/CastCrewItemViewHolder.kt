@@ -3,6 +3,7 @@ package com.example.moviedb.shared
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.moviedb.data.CastCrewPerson
 import com.example.moviedb.databinding.ItemCastCrewBinding
 
@@ -15,6 +16,7 @@ class CastCrewItemViewHolder(
         binding.apply {
             Glide.with(imageViewProfile)
                 .load(castCrewPerson.profileUrl)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .into(imageViewProfile)
 
             textViewPlaceholder.text = castCrewPerson.initials

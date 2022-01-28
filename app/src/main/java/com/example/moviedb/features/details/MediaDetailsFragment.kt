@@ -181,15 +181,6 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                         textViewReleaseDate.text =
                             result.data?.releaseDate ?: "Unknown release date..."
 
-                        textViewHomepageText.setOnClickListener {
-                            if (!result.data?.homepage.isNullOrBlank()) {
-                                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(result.data?.homepage))
-                                startActivity(webIntent)
-                            }
-                            else {
-                                showSnackbar(getString(R.string.no_homepage_available), duration = Snackbar.LENGTH_SHORT)
-                            }
-                        }
                     }
                 }
 
@@ -209,7 +200,6 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                         val result = it ?: return@collect
 
                         textViewCrew.isVisible = result is Resource.Success
-
                         recyclerViewCrew.isVisible = result is Resource.Success
 
                         val directorsCreators = viewModel.getDirectorsCreators(result.data)
@@ -239,28 +229,10 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                         recommendationAdapter.submitList(result.data)
                     }
                 }
+            }
 
-                launch {
-                    viewModel.mediaVideo.collect {
-                        val result = it ?: return@collect
-
-                        textViewTrailer.setOnClickListener {
-                            val appIntent = Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("vnd.youtube:${result.data?.key}")
-                            )
-                            val webIntent = Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("http://www.youtube.com/watch?v=${result.data?.key}")
-                            )
-                            try {
-                                context!!.startActivity(appIntent)
-                            } catch (ex: ActivityNotFoundException) {
-                                context!!.startActivity(webIntent)
-                            }
-                        }
-                    }
-                }
+            textViewHomepageText.setOnClickListener {
+                viewModel.onHomepageClick()
             }
 
             viewOverviewContainer.setOnClickListener {
@@ -290,6 +262,10 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                         animatorSet.start()
                     }
                 }
+            }
+
+            textViewTrailer.setOnClickListener {
+                viewModel.onTrailerClick()
             }
 
             tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -376,6 +352,19 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                                     event.id
                                 )
                             findNavController().navigate(action)
+                        }
+                        is MediaDetailsViewModel.Event.OpenMediaTrailer -> {
+                            val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:${event.key}"))
+                            startActivity(appIntent)
+                        }
+                        is MediaDetailsViewModel.Event.OpenMediaHomepage -> {
+                            if (!event.url.isNullOrBlank()) {
+                                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(event.url))
+                                startActivity(webIntent)
+                            }
+                            else {
+                                showSnackbar(getString(R.string.no_homepage_available), duration = Snackbar.LENGTH_SHORT)
+                            }
                         }
                     }.exhaustive
                 }

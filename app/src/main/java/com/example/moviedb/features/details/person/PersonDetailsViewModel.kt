@@ -6,7 +6,10 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.example.moviedb.data.ListItem
 import com.example.moviedb.data.MovieRepository
+import com.example.moviedb.features.details.MediaDetailsViewModel
+import com.example.moviedb.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -62,11 +65,25 @@ class PersonDetailsViewModel @Inject constructor(
         }
     }
 
+    fun onHomepageClick(){
+        onHomepageSelected()
+    }
+
+    private fun onHomepageSelected() = viewModelScope.launch {
+        personDetails.collect { result ->
+            if(result is Resource.Success) {
+                eventChannel.send(Event.OpenPersonHomepage(result.data?.homepage))
+                cancel()
+            }
+        }
+    }
+
     private fun onMediaSelected(listItem: ListItem) = viewModelScope.launch {
         eventChannel.send(Event.NavigateToMediaDetailsFragment(listItem))
     }
 
     sealed class Event {
         data class NavigateToMediaDetailsFragment(val listItem: ListItem) : Event()
+        data class OpenPersonHomepage(val url: String?) : Event()
     }
 }

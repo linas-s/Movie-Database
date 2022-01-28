@@ -83,7 +83,8 @@ class SearchViewModel @Inject constructor(
                         voteAverage = 0.0,
                         isWatchlist = false,
                         updatedAt = 0,
-                        popularity = 0.0
+                        popularity = 0.0,
+                        backdropPath = null
                     )
                     onMediaSelected(listItem)
                 }
