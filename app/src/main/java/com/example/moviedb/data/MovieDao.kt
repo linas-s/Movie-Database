@@ -34,6 +34,9 @@ interface MovieDao {
     @Query("SELECT id, title, releaseDate, posterPath, backdropPath, popularity, voteAverage, isWatchlist, updatedAt, 'tv' AS mediaType FROM tv_show ORDER BY popularity DESC LIMIT 20")
     fun getPopular20TvShows(): Flow<List<ListItem>>
 
+    @Query("SELECT m.id, m.title, m.releaseDate, m.popularity, m.posterPath, m.backdropPath, m.voteAverage, m.isWatchlist, m.updatedAt, 'movie' AS mediaType FROM movie m INNER JOIN trending t ON m.id = t.mediaId")
+    fun getTrendingMovies(): Flow<List<ListItem>>
+
     @Query("SELECT id, title, releaseDate, posterPath, backdropPath, popularity, voteAverage, isWatchlist, updatedAt, 'movie' AS mediaType FROM movie WHERE isWatchlist = 1")
     fun getAllWatchlistMovies(): Flow<List<ListItem>>
 
@@ -113,6 +116,9 @@ interface MovieDao {
     fun getTvShowVideo(tvShowId: Int): Flow<MediaVideo>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTrending(trendingMovies: List<Trending>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovie(movie: Movie)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -168,4 +174,7 @@ interface MovieDao {
 
     @Query("DELETE from tv_show WHERE updatedAt < :timestampInMillis AND isWatchlist = 0")
     suspend fun deleteNonWatchlistTvShowsOlderThan(timestampInMillis: Long)
+
+    @Query("DELETE FROM trending")
+    suspend fun deleteTrending()
 }

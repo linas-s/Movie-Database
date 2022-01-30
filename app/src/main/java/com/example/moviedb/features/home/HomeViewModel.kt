@@ -31,6 +31,15 @@ class HomeViewModel @Inject constructor(
     var top20TvShowsPendingScrollToTopAfterRefresh = false
     var popular20TvShowsPendingScrollToTopAfterRefresh = false
 
+    val trendingMovies = refreshTrigger.flatMapLatest { refresh ->
+        repository.getTrendingMovies(
+            refresh == Refresh.FORCE,
+            onFetchFailed = { t ->
+                viewModelScope.launch { eventChannel.send(Event.ShowErrorMessage(t)) }
+            }
+        )
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
     val top20Movies = refreshTrigger.flatMapLatest { refresh ->
         repository.getTop20Movies(
             refresh == Refresh.FORCE,

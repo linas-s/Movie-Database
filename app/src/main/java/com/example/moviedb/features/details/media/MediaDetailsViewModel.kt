@@ -1,4 +1,4 @@
-package com.example.moviedb.features.details
+package com.example.moviedb.features.details.media
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

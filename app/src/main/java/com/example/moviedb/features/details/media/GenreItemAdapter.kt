@@ -1,11 +1,9 @@
-package com.example.moviedb.features.details
+package com.example.moviedb.features.details.media
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import com.example.moviedb.data.CastCrewPerson
 import com.example.moviedb.data.MediaGenre
-import com.example.moviedb.databinding.ItemCastCrewBinding
 import com.example.moviedb.databinding.ItemGenreBinding
 
 class GenreItemAdapter() : ListAdapter<MediaGenre, GenreItemViewHolder>(GenreItemComparator()) {

@@ -1,4 +1,4 @@
-package com.example.moviedb.features.details
+package com.example.moviedb.features.details.media
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
@@ -22,14 +22,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import androidx.core.graphics.ColorUtils
 import java.text.NumberFormat
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.example.moviedb.databinding.FragmentMediaDetailsBinding
-import com.example.moviedb.features.watchlist.WatchlistFragmentDirections
-import com.example.moviedb.features.watchlist.WatchlistViewModel
 import com.example.moviedb.util.exhaustive
 import com.example.moviedb.util.showSnackbar
 import com.google.android.material.snackbar.Snackbar

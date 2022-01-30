@@ -1,6 +1,5 @@
 package com.example.moviedb.features.home
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -139,6 +138,14 @@ class HomeFragment : Fragment(R.layout.fragment_home){
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 launch {
+                    viewModel.trendingMovies.collect{
+                        val result = it ?: return@collect
+
+                        viewPagerAdapter.submitList(result.data)
+                    }
+                }
+
+                launch {
                     viewModel.top20Movies.collect {
                         val result = it ?: return@collect
 
@@ -148,15 +155,12 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                                 viewModel.top20MoviesPendingScrollToTopAfterRefresh = false
                             }
                         }
-                        viewPagerAdapter.submitList(result.data)
                     }
                 }
 
                 launch {
                     viewModel.popular20Movies.collect {
                         val result = it ?: return@collect
-
-
 
                         popularMovieAdapter.submitList(result.data) {
                             if (viewModel.popular20MoviesPendingScrollToTopAfterRefresh) {
@@ -170,8 +174,6 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                 launch {
                     viewModel.top20TvShows.collect {
                         val result = it ?: return@collect
-
-
 
                         topTvShowAdapter.submitList(result.data) {
                             if (viewModel.top20TvShowsPendingScrollToTopAfterRefresh) {
@@ -195,6 +197,8 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                         textViewPopularMovies.isVisible = !result.data.isNullOrEmpty()
                         recyclerViewTopMovies.isVisible = !result.data.isNullOrEmpty()
                         textViewTopMovies.isVisible = !result.data.isNullOrEmpty()
+                        viewPager.isVisible = !result.data.isNullOrEmpty()
+                        textViewTrending.isVisible = !result.data.isNullOrEmpty()
 
                         textViewError.isVisible =
                             result.error != null && result.data.isNullOrEmpty()

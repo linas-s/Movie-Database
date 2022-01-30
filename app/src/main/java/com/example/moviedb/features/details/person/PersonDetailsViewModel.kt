@@ -6,7 +6,6 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.example.moviedb.data.ListItem
 import com.example.moviedb.data.MovieRepository
-import com.example.moviedb.features.details.MediaDetailsViewModel
 import com.example.moviedb.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel

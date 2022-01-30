@@ -6,8 +6,6 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.example.moviedb.data.*
-import com.example.moviedb.features.details.MediaDetailsViewModel
-import com.example.moviedb.features.home.HomeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*

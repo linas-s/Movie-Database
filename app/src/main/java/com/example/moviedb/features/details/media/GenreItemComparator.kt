@@ -1,4 +1,4 @@
-package com.example.moviedb.features.details
+package com.example.moviedb.features.details.media
 
 import androidx.recyclerview.widget.DiffUtil
 import com.example.moviedb.data.CastCrewPerson

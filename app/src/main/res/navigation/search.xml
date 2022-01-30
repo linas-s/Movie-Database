@@ -17,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/mediaDetailsFragment"
-        android:name="com.example.moviedb.features.details.MediaDetailsFragment"
+        android:name="com.example.moviedb.features.details.media.MediaDetailsFragment"
         android:label="MediaDetailsFragment" >
         <argument
             android:name="listItem"

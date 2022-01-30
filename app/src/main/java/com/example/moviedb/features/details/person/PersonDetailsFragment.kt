@@ -15,8 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.moviedb.R
 import com.example.moviedb.databinding.FragmentPersonDetailsBinding
-import com.example.moviedb.features.details.MediaDetailsFragmentDirections
-import com.example.moviedb.features.details.MediaDetailsViewModel
 import com.example.moviedb.shared.ListItemAdapter
 import com.example.moviedb.util.Resource
 import com.example.moviedb.util.exhaustive

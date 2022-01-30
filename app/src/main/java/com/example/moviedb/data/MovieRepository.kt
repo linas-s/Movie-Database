@@ -287,6 +287,79 @@ class MovieRepository @Inject constructor(
             }
         )
 
+    fun getTrendingMovies(
+        forceRefresh: Boolean,
+        onFetchFailed: (Throwable) -> Unit
+    ): Flow<Resource<List<ListItem>>> =
+        networkBoundResource(
+            query = {
+                movieDao.getTrendingMovies()
+            },
+            fetch = {
+                val response =
+                    movieApi.getTrendingMovies()
+                response.results
+            },
+            saveFetchResult = { serverMovies ->
+                val watchList = movieDao.getAllWatchlistMovies().first()
+
+                val movies =
+                    serverMovies.map { serverMovie ->
+                        val isWatchlist = watchList.any { watchListMovie ->
+                            watchListMovie.id == serverMovie.id
+                        }
+                        Movie(
+                            id = serverMovie.id,
+                            title = serverMovie.title,
+                            releaseDate = serverMovie.release_date,
+                            popularity = serverMovie.popularity,
+                            voteAverage = serverMovie.vote_average,
+                            voteCount = serverMovie.vote_count,
+                            overview = serverMovie.overview,
+                            backdropPath = serverMovie.backdrop_path,
+                            posterPath = serverMovie.poster_path,
+                            status = null,
+                            budget = null,
+                            tagline = serverMovie.tagline,
+                            homepage = serverMovie.homepage,
+                            runtime = serverMovie.runtime,
+                            isWatchlist = isWatchlist
+                        )
+                    }
+                val trendingMoviesId = movies.map { movie ->
+                    Trending(
+                        id = 0,
+                        mediaId = movie.id
+                    )
+                }
+                movieDb.withTransaction {
+                    movieDao.insertMovies(movies)
+                    movieDao.deleteTrending()
+                    movieDao.insertTrending(trendingMoviesId)
+                }
+            },
+            shouldFetch = { cachedMovies ->
+                if (forceRefresh) {
+                    true
+                } else {
+                    val sortedMovies = cachedMovies.sortedBy { movie ->
+                        movie.updatedAt
+                    }
+                    val oldestTimestamp = sortedMovies.firstOrNull()?.updatedAt
+                    val needsRefresh = oldestTimestamp == null ||
+                            oldestTimestamp < System.currentTimeMillis() -
+                            TimeUnit.DAYS.toMillis(1)
+                    needsRefresh
+                }
+            },
+            onFetchFailed = { t ->
+                if (t !is HttpException && t !is IOException) {
+                    throw t
+                }
+                onFetchFailed(t)
+            }
+        )
+
     fun getMovieFlow(
         listItem: ListItem
     ): Flow<Resource<MediaDetails>> =

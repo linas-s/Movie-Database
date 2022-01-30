@@ -12,7 +12,8 @@ import androidx.room.RoomDatabase
         Credits::class,
         MediaGenre::class,
         MediaRecommendation::class,
-        MediaVideo::class
+        MediaVideo::class,
+        Trending::class
     ],
     version = 1
 )

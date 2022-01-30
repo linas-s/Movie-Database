@@ -10,6 +10,8 @@ interface MovieApi {
     companion object {
         const val BASE_URL = "https://api.themoviedb.org/3/"
         const val API_KEY = BuildConfig.MOVIE_API_ACCESS_KEY
+        const val TRENDING_MEDIA_TYPE = "movie"
+        const val TRENDING_TIME_WINDOW = "week"
     }
 
     @GET("movie/top_rated")
@@ -104,4 +106,11 @@ interface MovieApi {
         @Path("person_id") id: Int,
         @Query("api_key") apiKey: String = API_KEY
     ): PersonMediaResponse
+
+    @GET("trending/{media_type}/{time_window}")
+    suspend fun getTrendingMovies(
+        @Path("media_type") mediaType: String = TRENDING_MEDIA_TYPE,
+        @Path("time_window") timeWindow: String = TRENDING_TIME_WINDOW,
+        @Query("api_key") apiKey: String = API_KEY
+    ):MovieListResponse
 }
