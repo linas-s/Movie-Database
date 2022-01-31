@@ -1,9 +1,7 @@
 package com.example.moviedb.features.home
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.moviedb.data.ListItem
-import com.example.moviedb.data.Movie
 import com.example.moviedb.data.MovieRepository
 import com.example.moviedb.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,11 +14,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: MovieRepository
+    private val repository: MovieRepository,
+    state: SavedStateHandle
 ) : ViewModel() {
 
     private val eventChannel = Channel<Event>()
     val events = eventChannel.receiveAsFlow()
+
+    private val currentPage = state.getLiveData("currentPage", 0)
 
     private val refreshTriggerChannel = Channel<Refresh>()
     private val refreshTrigger =
@@ -96,6 +97,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun onPageChange(page: Int) {
+        currentPage.value = page
+    }
+
+    fun getCurrentPage(): Int {
+        return currentPage.value ?: 0
+    }
+
     fun onStart() {
         if (top20Movies.value !is Resource.Loading ||
             popular20Movies.value !is Resource.Loading ||
@@ -149,7 +158,7 @@ class HomeViewModel @Inject constructor(
         eventChannel.send(Event.NavigateToMediaDetailsFragment(listItem))
     }
 
-    fun onTrailerClick(listItem: ListItem){
+    fun onTrailerClick(listItem: ListItem) {
         viewModelScope.launch {
             onTrailerSelected(listItem)
         }
@@ -157,7 +166,7 @@ class HomeViewModel @Inject constructor(
 
     private fun onTrailerSelected(listItem: ListItem) = viewModelScope.launch {
         repository.getMediaVideo(listItem).collectLatest { result ->
-            if(result is Resource.Success) {
+            if (result is Resource.Success) {
                 eventChannel.send(Event.OpenMediaTrailer(result.data?.key))
                 cancel()
             }

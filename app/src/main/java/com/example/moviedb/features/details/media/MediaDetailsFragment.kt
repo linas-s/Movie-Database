@@ -3,7 +3,6 @@ package com.example.moviedb.features.details.media
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -24,6 +23,7 @@ import androidx.core.graphics.ColorUtils
 import java.text.NumberFormat
 import android.content.Intent
 import android.net.Uri
+import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
 import com.example.moviedb.databinding.FragmentMediaDetailsBinding
 import com.example.moviedb.util.exhaustive
@@ -42,6 +42,9 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
         super.onViewCreated(view, savedInstanceState)
 
         currentBinding = FragmentMediaDetailsBinding.bind(view)
+
+        requireActivity().window.statusBarColor = Color.TRANSPARENT
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
 
         val castAdapter = CastCrewItemAdapter(
             onItemClick = { cast ->
@@ -74,10 +77,6 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
             }
 
             appBarLayout.bringToFront()
-
-            requireActivity().window.statusBarColor = Color.TRANSPARENT
-            requireActivity().window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 
             recyclerViewCast.apply {
                 adapter = castAdapter
@@ -129,7 +128,22 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                         textViewRating.isVisible = result is Resource.Success
                         textViewTrailer.isVisible = result is Resource.Success
                         imageViewStar.isVisible = result is Resource.Success
+                        textViewVoteCount.isVisible = result is Resource.Success
+                        groupCastCrew.isVisible =
+                            result is Resource.Success && tabLayout.selectedTabPosition == 0
+                        groupDetails.isVisible =
+                            result is Resource.Success && tabLayout.selectedTabPosition == 1
+                        groupGenre.isVisible =
+                            result is Resource.Success && tabLayout.selectedTabPosition == 2
 
+                        textViewCast.isVisible = result is Resource.Success
+                        recyclerViewCast.isVisible = result is Resource.Success
+
+                        textViewCrew.isVisible = result is Resource.Success
+                        recyclerViewCrew.isVisible = result is Resource.Success
+
+                        textViewRecommended.isVisible = result is Resource.Success
+                        recyclerViewRecommended.isVisible = result is Resource.Success
 
                         Glide.with(imageViewBackdrop)
                             .load(result.data?.backdropUrl)
@@ -161,7 +175,7 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                         if (result.data?.mediaType == "movie") {
                             textViewDirectedCreatedBy.text = "DIRECTED BY"
                             textViewReleaseDateRuntime.text =
-                                result.data?.releaseYear + " · " + result.data?.runtime + " mins"
+                                result.data.releaseYear + " · " + result.data.runtime + " mins"
                         } else {
                             textViewDirectedCreatedBy.text = "CREATED BY"
                             textViewReleaseDateRuntime.text =
@@ -184,9 +198,6 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                     viewModel.mediaCast.collect {
                         val result = it ?: return@collect
 
-                        textViewCast.isVisible = result is Resource.Success
-                        recyclerViewCast.isVisible = result is Resource.Success
-
                         castAdapter.submitList(result.data)
                     }
                 }
@@ -195,8 +206,7 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                     viewModel.mediaCrew.collect {
                         val result = it ?: return@collect
 
-                        textViewCrew.isVisible = result is Resource.Success
-                        recyclerViewCrew.isVisible = result is Resource.Success
+
 
                         val directorsCreators = viewModel.getDirectorsCreators(result.data)
 
@@ -219,8 +229,7 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                     viewModel.mediaRecommendations.collect {
                         val result = it ?: return@collect
 
-                        textViewRecommended.isVisible = result is Resource.Success
-                        recyclerViewRecommended.isVisible = result is Resource.Success
+
 
                         recommendationAdapter.submitList(result.data)
                     }
@@ -229,6 +238,10 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
 
             textViewHomepageText.setOnClickListener {
                 viewModel.onHomepageClick()
+            }
+
+            buttonRetry.setOnClickListener {
+                viewModel.onRetryButtonClick()
             }
 
             viewOverviewContainer.setOnClickListener {
@@ -296,38 +309,36 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                 }
             })
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-                    when {
-                        scrollY < 460 -> {
-                            requireActivity().window.statusBarColor = Color.TRANSPARENT
-                            toolbar.setBackgroundColor(Color.TRANSPARENT)
-                            toolbar.setTitleTextColor(Color.TRANSPARENT)
-                        }
-                        scrollY < 545 -> {
-                            requireActivity().window.statusBarColor = ColorUtils.setAlphaComponent(
-                                Color.parseColor("#181b20"),
-                                ((scrollY - 460) * 3)
+            scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+                when {
+                    scrollY < 460 -> {
+                        requireActivity().window.statusBarColor = Color.TRANSPARENT
+                        toolbar.setBackgroundColor(Color.TRANSPARENT)
+                        toolbar.setTitleTextColor(Color.TRANSPARENT)
+                    }
+                    scrollY < 545 -> {
+                        requireActivity().window.statusBarColor = ColorUtils.setAlphaComponent(
+                            Color.parseColor("#181b20"),
+                            ((scrollY - 460) * 3)
+                        )
+                        toolbar.setBackgroundColor(
+                            ColorUtils.setAlphaComponent(
+                                Color.parseColor(
+                                    "#445565"
+                                ), ((scrollY - 460) * 3)
                             )
-                            toolbar.setBackgroundColor(
-                                ColorUtils.setAlphaComponent(
-                                    Color.parseColor(
-                                        "#445565"
-                                    ), ((scrollY - 460) * 3)
-                                )
+                        )
+                        toolbar.setTitleTextColor(
+                            ColorUtils.setAlphaComponent(
+                                Color.WHITE,
+                                (((scrollY - 460) * 3))
                             )
-                            toolbar.setTitleTextColor(
-                                ColorUtils.setAlphaComponent(
-                                    Color.WHITE,
-                                    (((scrollY - 460) * 3))
-                                )
-                            )
-                        }
-                        else -> {
-                            requireActivity().window.statusBarColor = Color.parseColor("#181b20")
-                            toolbar.setBackgroundColor(Color.parseColor("#445565"))
-                            toolbar.setTitleTextColor(Color.WHITE)
-                        }
+                        )
+                    }
+                    else -> {
+                        requireActivity().window.statusBarColor = Color.parseColor("#181b20")
+                        toolbar.setBackgroundColor(Color.parseColor("#445565"))
+                        toolbar.setTitleTextColor(Color.WHITE)
                     }
                 }
             }
@@ -350,16 +361,28 @@ class MediaDetailsFragment : Fragment(R.layout.fragment_media_details) {
                             findNavController().navigate(action)
                         }
                         is MediaDetailsViewModel.Event.OpenMediaTrailer -> {
-                            val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:${event.key}"))
-                            startActivity(appIntent)
+                            if (!event.key.isNullOrBlank()) {
+                                val appIntent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("vnd.youtube:${event.key}")
+                                )
+                                startActivity(appIntent)
+                            } else {
+                                showSnackbar(
+                                    getString(R.string.no_trailer_available),
+                                    duration = Snackbar.LENGTH_SHORT
+                                )
+                            }
                         }
                         is MediaDetailsViewModel.Event.OpenMediaHomepage -> {
                             if (!event.url.isNullOrBlank()) {
                                 val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(event.url))
                                 startActivity(webIntent)
-                            }
-                            else {
-                                showSnackbar(getString(R.string.no_homepage_available), duration = Snackbar.LENGTH_SHORT)
+                            } else {
+                                showSnackbar(
+                                    getString(R.string.no_homepage_available),
+                                    duration = Snackbar.LENGTH_SHORT
+                                )
                             }
                         }
                     }.exhaustive

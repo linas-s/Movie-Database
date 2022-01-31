@@ -26,6 +26,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         android:layout_marginTop="?android:attr/actionBarSize">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -60,8 +61,8 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:text="@string/born"
-                android:visibility="invisible"
                 android:textColor="@color/white"
+                android:visibility="invisible"
                 app:layout_constraintStart_toEndOf="@+id/image_view_profile"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -70,9 +71,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:visibility="invisible"
                 android:text="@string/known_for"
                 android:textColor="@color/white"
+                android:visibility="invisible"
                 app:layout_constraintStart_toEndOf="@+id/image_view_profile"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_birth" />
 
@@ -114,10 +115,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:visibility="invisible"
+                android:ellipsize="end"
                 android:lineSpacingExtra="6sp"
                 android:maxLines="5"
-                android:ellipsize="end"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/image_view_profile"
@@ -180,10 +181,13 @@
                 android:id="@+id/text_view_error"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
                 android:gravity="center_horizontal"
                 android:visibility="gone"
-                app:layout_constraintBottom_toTopOf="@+id/button_retry"
+                app:layout_constraintBottom_toTopOf="@id/button_retry"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 tools:text="An error occurred"
@@ -209,6 +213,7 @@
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
 

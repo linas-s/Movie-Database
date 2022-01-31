@@ -1,7 +1,6 @@
 package com.example.moviedb.features.details.media
 
 import androidx.recyclerview.widget.DiffUtil
-import com.example.moviedb.data.CastCrewPerson
 import com.example.moviedb.data.MediaGenre
 
 class GenreItemComparator : DiffUtil.ItemCallback<MediaGenre>() {

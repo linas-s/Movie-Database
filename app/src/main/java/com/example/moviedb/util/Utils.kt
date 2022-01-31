@@ -1,7 +1,6 @@
 package com.example.moviedb.util
 
 import android.view.View
-import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 

@@ -24,10 +24,14 @@ class MediaDetailsViewModel @Inject constructor(
     private val eventChannel = Channel<Event>()
     val events = eventChannel.receiveAsFlow()
 
+    private val refreshTriggerChannel = Channel<ListItem>()
+    private val refreshTrigger =
+        refreshTriggerChannel.receiveAsFlow().shareIn(viewModelScope, SharingStarted.Lazily, 1)
+
     private val receivedMedia = state.getLiveData<ListItem>("listItem").asFlow()
         .shareIn(viewModelScope, SharingStarted.Lazily, 1)
 
-    val media = receivedMedia.flatMapLatest { media ->
+    val media = refreshTrigger.flatMapLatest { media ->
         val mediaDetails = if (media.mediaType == "movie") {
             repository.getMovieFlow(media)
         } else {
@@ -36,19 +40,19 @@ class MediaDetailsViewModel @Inject constructor(
         mediaDetails
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val mediaCast = receivedMedia.flatMapLatest { media ->
+    val mediaCast = refreshTrigger.flatMapLatest { media ->
         repository.getMediaCast(media)
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val mediaCrew = receivedMedia.flatMapLatest { media ->
+    val mediaCrew = refreshTrigger.flatMapLatest { media ->
         repository.getMediaCrew(media)
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val mediaGenres = receivedMedia.flatMapLatest { media ->
+    val mediaGenres = refreshTrigger.flatMapLatest { media ->
         repository.getMediaGenres(media)
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val mediaRecommendations = receivedMedia.flatMapLatest { media ->
+    val mediaRecommendations = refreshTrigger.flatMapLatest { media ->
         val mediaRecommendations = if (media.mediaType == "movie") {
             repository.getMovieRecommendations(media)
         } else {
@@ -56,6 +60,14 @@ class MediaDetailsViewModel @Inject constructor(
         }
         mediaRecommendations
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    init {
+        viewModelScope.launch {
+            receivedMedia.collect { media ->
+                refreshTriggerChannel.send(media)
+            }
+        }
+    }
 
     fun getDirectorsCreators(castCrewPersons: List<CastCrewPerson>?): List<CastCrewPerson>? {
         val movieDirectors = castCrewPersons?.filter { person ->
@@ -66,6 +78,14 @@ class MediaDetailsViewModel @Inject constructor(
         }
         return if (movieDirectors.isNullOrEmpty()) tvShowCreators
         else movieDirectors
+    }
+
+    fun onRetryButtonClick() {
+        viewModelScope.launch {
+            receivedMedia.collect { media ->
+                refreshTriggerChannel.send(media)
+            }
+        }
     }
 
     fun onRecommendedListItemClick(listItem: ListItem) {
@@ -121,8 +141,12 @@ class MediaDetailsViewModel @Inject constructor(
         receivedMedia.flatMapLatest { media ->
             repository.getMediaVideo(media)
         }.collect { result ->
-            if(result is Resource.Success) {
+            if (result is Resource.Success) {
                 eventChannel.send(Event.OpenMediaTrailer(result.data?.key))
+                cancel()
+            }
+            if (result is Resource.Error) {
+                eventChannel.send(Event.OpenMediaTrailer(null))
                 cancel()
             }
         }
@@ -130,13 +154,12 @@ class MediaDetailsViewModel @Inject constructor(
 
     private fun onHomepageSelected() = viewModelScope.launch {
         media.collect { result ->
-            if(result is Resource.Success) {
+            if (result is Resource.Success) {
                 eventChannel.send(Event.OpenMediaHomepage(result.data?.homepage))
                 cancel()
             }
         }
     }
-
 
     sealed class Event {
         data class NavigateToMediaDetailsFragment(val listItem: ListItem) : Event()

@@ -16,3 +16,12 @@ data class CreditsResponse(
     val cast: List<CastCrewDto>,
     val crew: List<CastCrewDto>
 )
+
+data class MediaVideoResponse(
+    val results: List<MediaVideoDto>
+)
+
+data class PersonMediaResponse(
+    val cast: List<PersonMedia>,
+    val crew: List<PersonMedia>
+)

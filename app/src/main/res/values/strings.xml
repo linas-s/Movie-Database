@@ -25,6 +25,7 @@
     <string name="release_date">RELEASE DATE</string>
     <string name="budget">BUDGET</string>
     <string name="no_homepage_available">No homepage available...</string>
+    <string name="no_trailer_available">No trailer available...</string>
     <string name="homepage"><u>HOMEPAGE</u></string>
     <string name="recommended">Recommended</string>
     <string name="cast">CAST</string>

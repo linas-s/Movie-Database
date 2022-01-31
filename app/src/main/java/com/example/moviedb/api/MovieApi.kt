@@ -112,5 +112,5 @@ interface MovieApi {
         @Path("media_type") mediaType: String = TRENDING_MEDIA_TYPE,
         @Path("time_window") timeWindow: String = TRENDING_TIME_WINDOW,
         @Query("api_key") apiKey: String = API_KEY
-    ):MovieListResponse
+    ): MovieListResponse
 }

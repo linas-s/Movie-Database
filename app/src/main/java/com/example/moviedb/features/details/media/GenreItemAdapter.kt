@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.ListAdapter
 import com.example.moviedb.data.MediaGenre
 import com.example.moviedb.databinding.ItemGenreBinding
 
-class GenreItemAdapter() : ListAdapter<MediaGenre, GenreItemViewHolder>(GenreItemComparator()) {
+class GenreItemAdapter : ListAdapter<MediaGenre, GenreItemViewHolder>(GenreItemComparator()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenreItemViewHolder {
         val binding =

@@ -3,7 +3,6 @@ package com.example.moviedb.features.watchlist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.moviedb.data.*
-import com.example.moviedb.features.search.SearchViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted

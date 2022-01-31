@@ -5,7 +5,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.moviedb.R
 import com.example.moviedb.data.ListItem
-import com.example.moviedb.data.Movie
 import com.example.moviedb.databinding.ItemViewPagerBinding
 
 class ViewPagerViewHolder (
@@ -18,8 +17,7 @@ class ViewPagerViewHolder (
         fun bind(listItem: ListItem){
             binding.apply {
                 textViewTitle.text = listItem.title
-
-
+                
                 Glide.with(imageViewPoster)
                     .load(listItem.posterUrl)
                     .error(R.drawable.ic_baseline_broken_image_24)

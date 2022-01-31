@@ -1,7 +1,9 @@
 package com.example.moviedb.features.watchlist
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -11,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.moviedb.R
 import com.example.moviedb.databinding.FragmentWatchlistBinding
-import com.example.moviedb.shared.ListItemAdapter
 import com.example.moviedb.util.exhaustive
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -29,7 +30,10 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {
 
         currentBinding = FragmentWatchlistBinding.bind(view)
 
-        val watchlistAdapter = ListItemAdapter(
+        requireActivity().window.statusBarColor = Color.parseColor("#445565")
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
+
+        val watchlistAdapter = WatchlistItemAdapter(
             onItemClick = { item ->
                 viewModel.onWatchlistItemClick(item)
             },

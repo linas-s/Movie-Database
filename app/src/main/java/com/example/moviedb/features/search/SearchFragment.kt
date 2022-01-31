@@ -1,8 +1,10 @@
 package com.example.moviedb.features.search
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -34,6 +36,9 @@ class SearchFragment : Fragment(R.layout.fragment_search){
         super.onViewCreated(view, savedInstanceState)
 
         currentBinding = FragmentSearchBinding.bind(view)
+
+        requireActivity().window.statusBarColor = Color.parseColor("#445565")
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
 
         searchListItemAdapter = SearchListItemPagingAdapter(
             onItemClick = { media ->
@@ -100,8 +105,6 @@ class SearchFragment : Fragment(R.layout.fragment_search){
 
                                 recyclerViewSearch.isVisible = !viewModel.newQueryInProgress && searchListItemAdapter.itemCount > 0
 
-                                //textViewInstructions.isVisible = false
-
                                 viewModel.refreshInProgress = true
                                 viewModel.pendingScrollToTopAfterRefresh = true
                             }
@@ -110,7 +113,6 @@ class SearchFragment : Fragment(R.layout.fragment_search){
                                 buttonRetry.isVisible = false
                                 swipeRefreshLayout.isRefreshing = false
                                 recyclerViewSearch.isVisible = searchListItemAdapter.itemCount > 0
-                                //textViewInstructions.isVisible = false
 
                                 val noResults =
                                     searchListItemAdapter.itemCount < 1 && loadState.append.endOfPaginationReached
@@ -124,7 +126,6 @@ class SearchFragment : Fragment(R.layout.fragment_search){
                             is LoadState.Error -> {
                                 swipeRefreshLayout.isRefreshing = false
                                 textViewNoResults.isVisible = false
-                                //textViewInstructions.isVisible = false
                                 recyclerViewSearch.isVisible = searchListItemAdapter.itemCount > 0
 
                                 val noCachedResults =
@@ -147,6 +148,7 @@ class SearchFragment : Fragment(R.layout.fragment_search){
                                 viewModel.newQueryInProgress = false
                                 viewModel.pendingScrollToTopAfterRefresh = false
                             }
+                            else -> {}
                         }
                     }
             }

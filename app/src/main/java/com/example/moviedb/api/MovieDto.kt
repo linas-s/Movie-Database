@@ -108,3 +108,40 @@ data class GenreDto(
     val id: Int,
     val name: String
 )
+
+data class MediaVideoDto(
+    val site: String,
+    val key: String,
+    val type: String,
+    val published_at: String
+)
+
+data class PersonDetailsDto(
+    val id: Int,
+    val name: String,
+    val biography: String,
+    val place_of_birth: String?,
+    val profile_path: String?,
+    val homepage: String?,
+    val birthday: String?,
+    val known_for_department: String,
+    val deathday: String?,
+    val popularity: Double
+)
+
+data class PersonMedia(
+    val id: Int,
+    val title: String?,
+    val name: String?,
+    val release_date: String?,
+    val first_air_date: String?,
+    val poster_path: String?,
+    val vote_average: Double,
+    val popularity: Double,
+    val media_type: String,
+    val vote_count: Int,
+    val overview: String,
+    val backdrop_path: String?,
+    val character: String?,
+    val job: String?
+)

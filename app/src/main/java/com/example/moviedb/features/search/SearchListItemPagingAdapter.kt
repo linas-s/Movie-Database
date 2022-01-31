@@ -3,7 +3,6 @@ package com.example.moviedb.features.search
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.ListAdapter
 import com.example.moviedb.data.SearchListItem
 import com.example.moviedb.databinding.ItemSearchListItemBinding
 

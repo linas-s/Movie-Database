@@ -23,21 +23,32 @@ class PersonDetailsViewModel @Inject constructor(
     private val eventChannel = Channel<Event>()
     val events = eventChannel.receiveAsFlow()
 
+    private val refreshTriggerChannel = Channel<Int>()
+    private val refreshTrigger =
+        refreshTriggerChannel.receiveAsFlow().shareIn(viewModelScope, SharingStarted.Lazily, 1)
+
     private val receivedPersonId = state.getLiveData<Int>("Id").asFlow()
         .shareIn(viewModelScope, SharingStarted.Lazily, 1)
 
-    val personDetails = receivedPersonId.flatMapLatest { personId ->
+    val personDetails = refreshTrigger.flatMapLatest { personId ->
         repository.getPersonDetails(personId)
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val personMediaCast = receivedPersonId.flatMapLatest { personId ->
+    val personMediaCast = refreshTrigger.flatMapLatest { personId ->
         repository.getPersonMediaCast(personId)
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val personMediaCrew = receivedPersonId.flatMapLatest { personId ->
+    val personMediaCrew = refreshTrigger.flatMapLatest { personId ->
         repository.getPersonMediaCrew(personId)
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
+    init {
+        viewModelScope.launch {
+            receivedPersonId.collect { personId ->
+                refreshTriggerChannel.send(personId)
+            }
+        }
+    }
 
     fun onWatchlistClick(listItem: ListItem) {
         viewModelScope.launch {
@@ -54,6 +65,14 @@ class PersonDetailsViewModel @Inject constructor(
                     val updatedTvShow = tvShow.copy(isWatchlist = !currentlyWatchlist)
                     repository.updateTvShow(updatedTvShow)
                 }
+            }
+        }
+    }
+
+    fun onRetryButtonClick() {
+        viewModelScope.launch {
+            receivedPersonId.collect { personId ->
+                refreshTriggerChannel.send(personId)
             }
         }
     }

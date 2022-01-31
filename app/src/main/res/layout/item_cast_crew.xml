@@ -27,6 +27,7 @@
             android:id="@+id/text_view_placeholder"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:textSize="24sp"
             android:gravity="center"
             android:visibility="invisible"
             tools:text="Placeholder name" />

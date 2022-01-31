@@ -3,7 +3,6 @@ package com.example.moviedb.data
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.room.PrimaryKey
 import androidx.room.withTransaction
 import com.example.moviedb.api.MovieApi
 import com.example.moviedb.util.Resource
@@ -619,13 +618,13 @@ class MovieRepository @Inject constructor(
             },
             saveFetchResult = { serverCast ->
                 val cast =
-                    serverCast.map { serverCast ->
+                    serverCast.map { serverCastPerson ->
                         Person(
-                            id = serverCast.id,
-                            title = serverCast.name,
-                            posterPath = serverCast.profile_path,
-                            popularity = serverCast.popularity,
-                            knownForDepartment = serverCast.known_for_department,
+                            id = serverCastPerson.id,
+                            title = serverCastPerson.name,
+                            posterPath = serverCastPerson.profile_path,
+                            popularity = serverCastPerson.popularity,
+                            knownForDepartment = serverCastPerson.known_for_department,
                             birthday = null,
                             deathDay = null,
                             homepage = null,
@@ -635,14 +634,14 @@ class MovieRepository @Inject constructor(
                     }
 
                 val credits =
-                    serverCast.map { serverCast ->
+                    serverCast.map { serverCastPerson ->
                         Credits(
                             mediaType = listItem.mediaType,
                             mediaId = listItem.id,
-                            personId = serverCast.id,
-                            character = serverCast.character,
+                            personId = serverCastPerson.id,
+                            character = serverCastPerson.character,
                             job = "acting",
-                            listOrder = serverCast.order
+                            listOrder = serverCastPerson.order
                         )
                     }
                 movieDb.withTransaction {
@@ -674,13 +673,13 @@ class MovieRepository @Inject constructor(
             },
             saveFetchResult = { serverCrew ->
                 val crew =
-                    serverCrew.map { serverCrew ->
+                    serverCrew.map { serverCrewPerson ->
                         Person(
-                            id = serverCrew.id,
-                            title = serverCrew.name,
-                            posterPath = serverCrew.profile_path,
-                            popularity = serverCrew.popularity,
-                            knownForDepartment = serverCrew.known_for_department,
+                            id = serverCrewPerson.id,
+                            title = serverCrewPerson.name,
+                            posterPath = serverCrewPerson.profile_path,
+                            popularity = serverCrewPerson.popularity,
+                            knownForDepartment = serverCrewPerson.known_for_department,
                             birthday = null,
                             deathDay = null,
                             homepage = null,
@@ -690,14 +689,14 @@ class MovieRepository @Inject constructor(
                     }
 
                 val credits =
-                    serverCrew.map { serverCrew ->
+                    serverCrew.map { serverCrewPerson ->
                         Credits(
                             mediaType = listItem.mediaType,
                             mediaId = listItem.id,
-                            personId = serverCrew.id,
+                            personId = serverCrewPerson.id,
                             character = null,
-                            job = serverCrew.job,
-                            listOrder = serverCrew.order
+                            job = serverCrewPerson.job,
+                            listOrder = serverCrewPerson.order
                         )
                     }
                 movieDb.withTransaction {
@@ -747,8 +746,8 @@ class MovieRepository @Inject constructor(
                 }
                 filtered
             },
-            saveFetchResult = { serverVideo ->
-                val videos = serverVideo.map { serverVideo ->
+            saveFetchResult = { serverVideos ->
+                val videos = serverVideos.map { serverVideo ->
                     MediaVideo(
                         mediaType = listItem.mediaType,
                         id = listItem.id,
@@ -808,29 +807,29 @@ class MovieRepository @Inject constructor(
                 val response = movieApi.getPersonMedia(personId)
                 response.cast
             },
-            saveFetchResult = { serverMedia ->
+            saveFetchResult = { serverMediaList ->
 
                 val movieWatchList = movieDao.getAllWatchlistMovies().first()
 
-                val movies = serverMedia.filter { serverMedia ->
+                val movies = serverMediaList.filter { serverMedia ->
                     serverMedia.media_type == "movie"
-                }.map { serverMedia ->
+                }.map { serverMediaItem ->
                     val isWatchlist = movieWatchList.any { watchListMovie ->
-                        watchListMovie.id == serverMedia.id
+                        watchListMovie.id == serverMediaItem.id
                     }
                     Movie(
-                        id = serverMedia.id,
-                        title = serverMedia.title ?: "",
-                        releaseDate = serverMedia.release_date ?: "",
-                        popularity = serverMedia.popularity,
-                        voteAverage = serverMedia.vote_average,
-                        voteCount = serverMedia.vote_count,
-                        overview = serverMedia.overview,
+                        id = serverMediaItem.id,
+                        title = serverMediaItem.title ?: "",
+                        releaseDate = serverMediaItem.release_date ?: "",
+                        popularity = serverMediaItem.popularity,
+                        voteAverage = serverMediaItem.vote_average,
+                        voteCount = serverMediaItem.vote_count,
+                        overview = serverMediaItem.overview,
                         status = null,
                         budget = null,
                         tagline = null,
-                        backdropPath = serverMedia.backdrop_path,
-                        posterPath = serverMedia.poster_path,
+                        backdropPath = serverMediaItem.backdrop_path,
+                        posterPath = serverMediaItem.poster_path,
                         homepage = null,
                         runtime = 0,
                         isWatchlist = isWatchlist
@@ -839,33 +838,33 @@ class MovieRepository @Inject constructor(
 
                 val tvShowWatchList = movieDao.getAllWatchlistTvShows().first()
 
-                val tvShows = serverMedia.filter { serverMedia ->
+                val tvShows = serverMediaList.filter { serverMedia ->
                     serverMedia.media_type == "tv"
-                }.map { serverMedia ->
+                }.map { serverMediaItem ->
                     val isWatchlist = tvShowWatchList.any { watchListTvShow ->
-                        watchListTvShow.id == serverMedia.id
+                        watchListTvShow.id == serverMediaItem.id
                     }
                     TvShow(
-                        id = serverMedia.id,
-                        title = serverMedia.name ?: "",
-                        releaseDate = serverMedia.first_air_date ?: "",
-                        popularity = serverMedia.popularity,
-                        voteAverage = serverMedia.vote_average,
-                        voteCount = serverMedia.vote_count,
-                        overview = serverMedia.overview,
+                        id = serverMediaItem.id,
+                        title = serverMediaItem.name ?: "",
+                        releaseDate = serverMediaItem.first_air_date ?: "",
+                        popularity = serverMediaItem.popularity,
+                        voteAverage = serverMediaItem.vote_average,
+                        voteCount = serverMediaItem.vote_count,
+                        overview = serverMediaItem.overview,
                         lastAirDate = null,
                         numberOfSeasons = null,
                         status = null,
                         tagline = null,
-                        backdropPath = serverMedia.backdrop_path,
-                        posterPath = serverMedia.poster_path,
+                        backdropPath = serverMediaItem.backdrop_path,
+                        posterPath = serverMediaItem.poster_path,
                         homepage = null,
                         isWatchlist = isWatchlist
                     )
                 }
 
                 val credits =
-                    serverMedia.map { serverCast ->
+                    serverMediaList.map { serverCast ->
                         Credits(
                             mediaType = serverCast.media_type,
                             mediaId = serverCast.id,
@@ -895,29 +894,29 @@ class MovieRepository @Inject constructor(
                 val response = movieApi.getPersonMedia(personId)
                 response.crew
             },
-            saveFetchResult = { serverMedia ->
+            saveFetchResult = { serverMediaList ->
 
                 val movieWatchList = movieDao.getAllWatchlistMovies().first()
 
-                val movies = serverMedia.filter { serverMedia ->
+                val movies = serverMediaList.filter { serverMedia ->
                     serverMedia.media_type == "movie"
-                }.map { serverMedia ->
+                }.map { serverMediaItem ->
                     val isWatchlist = movieWatchList.any { watchListMovie ->
-                        watchListMovie.id == serverMedia.id
+                        watchListMovie.id == serverMediaItem.id
                     }
                     Movie(
-                        id = serverMedia.id,
-                        title = serverMedia.title ?: "",
-                        releaseDate = serverMedia.release_date ?: "",
-                        popularity = serverMedia.popularity,
-                        voteAverage = serverMedia.vote_average,
-                        voteCount = serverMedia.vote_count,
-                        overview = serverMedia.overview,
+                        id = serverMediaItem.id,
+                        title = serverMediaItem.title ?: "",
+                        releaseDate = serverMediaItem.release_date ?: "",
+                        popularity = serverMediaItem.popularity,
+                        voteAverage = serverMediaItem.vote_average,
+                        voteCount = serverMediaItem.vote_count,
+                        overview = serverMediaItem.overview,
                         status = null,
                         budget = null,
                         tagline = null,
-                        backdropPath = serverMedia.backdrop_path,
-                        posterPath = serverMedia.poster_path,
+                        backdropPath = serverMediaItem.backdrop_path,
+                        posterPath = serverMediaItem.poster_path,
                         homepage = null,
                         runtime = 0,
                         isWatchlist = isWatchlist
@@ -926,33 +925,33 @@ class MovieRepository @Inject constructor(
 
                 val tvShowWatchList = movieDao.getAllWatchlistTvShows().first()
 
-                val tvShows = serverMedia.filter { serverMedia ->
+                val tvShows = serverMediaList.filter { serverMedia ->
                     serverMedia.media_type == "tv"
-                }.map { serverMedia ->
+                }.map { serverMediaItem ->
                     val isWatchlist = tvShowWatchList.any { watchListTvShow ->
-                        watchListTvShow.id == serverMedia.id
+                        watchListTvShow.id == serverMediaItem.id
                     }
                     TvShow(
-                        id = serverMedia.id,
-                        title = serverMedia.name ?: "",
-                        releaseDate = serverMedia.first_air_date ?: "",
-                        popularity = serverMedia.popularity,
-                        voteAverage = serverMedia.vote_average,
-                        voteCount = serverMedia.vote_count,
-                        overview = serverMedia.overview,
+                        id = serverMediaItem.id,
+                        title = serverMediaItem.name ?: "",
+                        releaseDate = serverMediaItem.first_air_date ?: "",
+                        popularity = serverMediaItem.popularity,
+                        voteAverage = serverMediaItem.vote_average,
+                        voteCount = serverMediaItem.vote_count,
+                        overview = serverMediaItem.overview,
                         lastAirDate = null,
                         numberOfSeasons = null,
                         status = null,
                         tagline = null,
-                        backdropPath = serverMedia.backdrop_path,
-                        posterPath = serverMedia.poster_path,
+                        backdropPath = serverMediaItem.backdrop_path,
+                        posterPath = serverMediaItem.poster_path,
                         homepage = null,
                         isWatchlist = isWatchlist
                     )
                 }
 
                 val credits =
-                    serverMedia.map { serverCrew ->
+                    serverMediaList.map { serverCrew ->
                         Credits(
                             mediaType = serverCrew.media_type,
                             mediaId = serverCrew.id,

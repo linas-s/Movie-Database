@@ -1,9 +1,11 @@
 package com.example.moviedb.features.home
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -11,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.example.moviedb.R
 import com.example.moviedb.databinding.FragmentHomeBinding
 import com.example.moviedb.shared.ListItemAdapter
@@ -22,7 +25,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class HomeFragment : Fragment(R.layout.fragment_home){
+class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val viewModel: HomeViewModel by viewModels()
 
@@ -33,6 +36,9 @@ class HomeFragment : Fragment(R.layout.fragment_home){
         super.onViewCreated(view, savedInstanceState)
 
         currentBinding = FragmentHomeBinding.bind(view)
+
+        requireActivity().window.statusBarColor = Color.parseColor("#445565")
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
 
         val viewPagerAdapter = ViewPagerAdapter(
             onItemClick = { item ->
@@ -102,6 +108,12 @@ class HomeFragment : Fragment(R.layout.fragment_home){
 
             viewPager.apply {
                 adapter = viewPagerAdapter
+                registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        super.onPageSelected(position)
+                        if (position != 0) viewModel.onPageChange(position)
+                    }
+                })
             }
 
             recyclerViewTopMovies.apply {
@@ -138,10 +150,11 @@ class HomeFragment : Fragment(R.layout.fragment_home){
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 launch {
-                    viewModel.trendingMovies.collect{
+                    viewModel.trendingMovies.collect {
                         val result = it ?: return@collect
 
                         viewPagerAdapter.submitList(result.data)
+                        viewPager.setCurrentItem(viewModel.getCurrentPage(), false)
                     }
                 }
 
@@ -247,7 +260,8 @@ class HomeFragment : Fragment(R.layout.fragment_home){
                             findNavController().navigate(action)
                         }
                         is HomeViewModel.Event.OpenMediaTrailer -> {
-                            val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:${event.key}"))
+                            val appIntent =
+                                Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:${event.key}"))
                             startActivity(appIntent)
                         }
                     }.exhaustive

@@ -3,9 +3,11 @@ package com.example.moviedb.features.details.person
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -35,6 +37,9 @@ class PersonDetailsFragment : Fragment(R.layout.fragment_person_details) {
         super.onViewCreated(view, savedInstanceState)
 
         currentBinding = FragmentPersonDetailsBinding.bind(view)
+
+        requireActivity().window.statusBarColor = Color.parseColor("#445565")
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
 
         val personCastAdapter = ListItemAdapter(
             onItemClick = { item ->
@@ -97,7 +102,7 @@ class PersonDetailsFragment : Fragment(R.layout.fragment_person_details) {
 
                         toolbar.title = result.data?.title
                         textViewBirth.text =
-                            result.data?.birthday + " in " + result.data?.placeOfBirth
+                            (result.data?.birthday ?: "Unknown birthday") + " in " + (result.data?.placeOfBirth ?: "unknown birth location")
                         textViewKnownFor.text = result.data?.knownForDepartment
                         textViewBiography.text = result.data?.biography
                         Glide.with(imageViewProfile)
@@ -175,6 +180,9 @@ class PersonDetailsFragment : Fragment(R.layout.fragment_person_details) {
                     }
                 }
 
+                buttonRetry.setOnClickListener {
+                    viewModel.onRetryButtonClick()
+                }
             }
         }
 

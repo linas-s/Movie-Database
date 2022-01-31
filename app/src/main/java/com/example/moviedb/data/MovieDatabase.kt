@@ -15,7 +15,8 @@ import androidx.room.RoomDatabase
         MediaVideo::class,
         Trending::class
     ],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 abstract class MovieDatabase : RoomDatabase() {
 
